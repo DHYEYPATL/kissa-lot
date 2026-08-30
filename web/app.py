@@ -8,14 +8,16 @@ from fastapi import FastAPI, Form
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from kissa_lot.orchestrator import run_development
+from qissa.eval_harness import run_eval
+from qissa.pipeline import human_gate, run_desk
+from qissa.state import SeriesState
 
 load_dotenv()
 
 ROOT = Path(__file__).resolve().parent
-SAMPLE = (ROOT.parent / "examples" / "night_kitchen.fountain").read_text(encoding="utf-8")
+SESSIONS: dict[str, SeriesState] = {}
 
-app = FastAPI(title="Kissa Lot", version="1.0.0")
+app = FastAPI(title="Qissa Studio", version="2.0.0")
 app.mount("/static", StaticFiles(directory=str(ROOT / "static")), name="static")
 
 
@@ -23,22 +25,35 @@ app.mount("/static", StaticFiles(directory=str(ROOT / "static")), name="static")
 def health() -> dict:
     return {
         "ok": True,
+        "product": "Qissa Studio",
+        "track": "Parallel",
         "gemini": bool(os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_GENAI_USE_VERTEXAI") == "true"),
         "parallel": bool(os.environ.get("PARALLEL_API_KEY")),
-        "track": "Parallel",
+        "eval": run_eval(),
     }
 
 
 @app.get("/", response_class=HTMLResponse)
 def index() -> str:
-    page = (ROOT / "static" / "index.html").read_text(encoding="utf-8")
-    return page.replace("%%SAMPLE%%", SAMPLE.replace("</", "<\\/"))
+    return (ROOT / "static" / "index.html").read_text(encoding="utf-8")
 
 
-@app.post("/api/develop")
-def develop(
-    pages: str = Form(...),
+@app.post("/api/open")
+def open_lot(
+    seed: str = Form(...),
+    genre: str = Form("regional family drama"),
     title: str = Form(""),
 ) -> JSONResponse:
-    result = run_development(pages, title_hint=title)
-    return JSONResponse(result.model_dump())
+    state = run_desk(seed, genre=genre, title=title)
+    SESSIONS["current"] = state
+    return JSONResponse(state.model_dump())
+
+
+@app.post("/api/gate")
+def gate(action: str = Form(...), note: str = Form("")) -> JSONResponse:
+    state = SESSIONS.get("current")
+    if state is None:
+        return JSONResponse({"error": "no series on the lot"}, status_code=400)
+    state = human_gate(state, action, note)
+    SESSIONS["current"] = state
+    return JSONResponse(state.model_dump())

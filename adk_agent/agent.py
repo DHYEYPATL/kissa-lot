@@ -1,59 +1,49 @@
-"""Google ADK root agent for Kissa Lot.
-
-Run with:
-    adk web
-or import root_agent from this module when deploying to Vertex AI Agent Engine.
-"""
+"""Google ADK root agent for Qissa Studio. No LangGraph. No OpenAI."""
 
 from __future__ import annotations
 
-from kissa_lot.orchestrator import run_development
-from kissa_lot.tools.parallel_search import parallel_web_search
-from kissa_lot.tools.script_parse import parse_screenplay
+from qissa.pipeline import human_gate, run_desk
+from qissa.search import parallel_search
+from qissa.state import SeriesState
+
+SESSIONS: dict[str, SeriesState] = {}
 
 
-def develop_kissa(screenplay_or_logline: str, title: str = "") -> dict:
-    """Run the full Kissa Lot development desk on a logline or screenplay.
-
-    Use this when a filmmaker pastes pages or a one-line kissa and needs a
-    greenlight packet grounded in live web research.
-    """
-    result = run_development(screenplay_or_logline, title_hint=title)
-    return result.model_dump()
+def open_qissa(seed: str, genre: str = "regional family drama") -> dict:
+    """Run Trend Scout to Canary. Stops at the human gate."""
+    state = run_desk(seed, genre=genre)
+    SESSIONS["current"] = state
+    return state.model_dump()
 
 
-def breakdown_pages(screenplay_or_logline: str, title: str = "") -> dict:
-    """Parse production format without calling the network."""
-    return parse_screenplay(screenplay_or_logline, title_hint=title).model_dump()
+def human_decide(action: str, note: str = "") -> dict:
+    """action is approve | reject | direct."""
+    state = SESSIONS.get("current")
+    if state is None:
+        return {"error": "no series on the lot"}
+    state = human_gate(state, action, note)
+    SESSIONS["current"] = state
+    return state.model_dump()
 
 
-def search_production_web(objective: str, query_one: str, query_two: str = "", query_three: str = "") -> list[dict]:
-    """Search the live web with Parallel so the agent never invents a citation."""
-    queries = [q for q in (query_one, query_two, query_three) if q.strip()]
-    hits = parallel_web_search(objective, queries)
-    return [h.model_dump() for h in hits]
+def search_live_web(objective: str, query_one: str, query_two: str = "") -> list[dict]:
+    """Parallel Search API. Required partner runtime call."""
+    return parallel_search(objective, [q for q in (query_one, query_two) if q])
 
 
 try:
     from google.adk import Agent
 
     root_agent = Agent(
-        name="kissa_lot_agent",
+        name="qissa_studio",
         model="gemini-2.5-flash",
-        description=(
-            "Development desk for filmmakers. Turns a logline or screenplay into "
-            "an audience-grounded greenlight packet using Parallel Search and a "
-            "deterministic complexity score."
-        ),
+        description="Human-in-the-loop greenlight loop for serialized audio.",
         instruction=(
-            "You are Kissa Lot, a studio development agent. A kissa is a story. "
-            "When the user pastes a logline or pages, call develop_kissa. "
-            "When they ask a narrow research question, call search_production_web "
-            "with a clear objective and 2-3 short keyword queries. "
-            "Never invent URLs. Prefer the tool output over your prior. "
-            "Be blunt about schedule risk. Speak like a producer who still loves movies."
+            "You are Qissa Studio. A qissa is a story. You do not replace writers. "
+            "Call open_qissa on a seed. Then wait. Call human_decide only when the "
+            "user accepts, rejects, or gives a note. Never invent Parallel URLs."
         ),
-        tools=[develop_kissa, breakdown_pages, search_production_web],
+        tools=[open_qissa, human_decide, search_live_web],
     )
-except Exception:  # pragma: no cover - environments without ADK still run the API
+except Exception:
     root_agent = None
