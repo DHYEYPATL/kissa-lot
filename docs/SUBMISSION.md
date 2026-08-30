@@ -10,7 +10,7 @@
 
 **License:** MIT (file at repo root)
 
-**Hosted project URL:** *(paste Cloud Run URL after `gcloud run deploy`)*
+**Hosted project URL:** https://qissa-studio-d7lrfpwafq-uc.a.run.app
 
 **Demo video URL:** *(YouTube/Vimeo, ≤3 min, English, app on camera — follow docs/DEMO_SCRIPT.md)*
 

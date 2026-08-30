@@ -1,5 +1,5 @@
-# Qissa Studio - One-Click Cloud Run Deploy Script
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Continue"
+$ProgressPreference = "SilentlyContinue"
 
 Write-Host "=========================================" -ForegroundColor Cyan
 Write-Host "   Qissa Studio: Cloud Run Deployer     " -ForegroundColor Cyan
@@ -84,8 +84,9 @@ gcloud run deploy qissa-studio `
     --timeout 300 `
     --min-instances 0 `
     --max-instances 3 `
-    --set-secrets=GEMINI_API_KEY=GEMINI_API_KEY:latest,PARALLEL_API_KEY=PARALLEL_API_KEY:latest `
-    --set-env-vars=GEMINI_MODEL=gemini-2.5-flash,PARALLEL_SEARCH_MODE=fast,KISSA_DEMO_MODE=false,GOOGLE_CLOUD_LOCATION=us-central1
+    --set-secrets="GEMINI_API_KEY=GEMINI_API_KEY:latest,PARALLEL_API_KEY=PARALLEL_API_KEY:latest" `
+    --set-env-vars="GEMINI_MODEL=gemini-2.5-flash,PARALLEL_SEARCH_MODE=fast,KISSA_DEMO_MODE=false,GOOGLE_CLOUD_LOCATION=us-central1" `
+    --quiet
 
 Write-Host "=========================================" -ForegroundColor Green
 Write-Host "   DEPLOYMENT COMPLETE!                 " -ForegroundColor Green
