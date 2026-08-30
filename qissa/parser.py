@@ -1,8 +1,51 @@
+"""Deterministic production-format parser and complexity scoring.
+
+Pure deterministic logic without external LLM dependencies.
+"""
+
 from __future__ import annotations
 
 import re
+from collections import defaultdict
+from pydantic import BaseModel, Field
 
-from kissa_lot.models import SceneBeat, ScriptBreakdown
+
+class SceneBeat(BaseModel):
+    index: int = 1
+    heading: str = ""
+    int_ext: str = "INT"
+    day_night: str | None = None
+    location: str = ""
+    summary: str = ""
+    characters: list[str] = Field(default_factory=list)
+    props: list[str] = Field(default_factory=list)
+    vfx_hint: bool = False
+
+
+class ScriptBreakdown(BaseModel):
+    title: str = ""
+    logline: str = ""
+    genre_guess: list[str] = Field(default_factory=list)
+    themes: list[str] = Field(default_factory=list)
+    characters: list[str] = Field(default_factory=list)
+    locations: list[str] = Field(default_factory=list)
+    props: list[str] = Field(default_factory=list)
+    scenes: list[SceneBeat] = Field(default_factory=list)
+    night_scenes: int = 0
+    int_count: int = 0
+    ext_count: int = 0
+    vfx_flags: list[str] = Field(default_factory=list)
+    page_estimate: int = 1
+    raw_excerpt: str = ""
+
+
+class ComplexityReport(BaseModel):
+    score: int = 10
+    verdict: str = "GREEN"
+    drivers: list[str] = Field(default_factory=list)
+    cuts: list[str] = Field(default_factory=list)
+    shooting_groups: list[dict] = Field(default_factory=list)
+
 
 HEADING_RE = re.compile(
     r"^(INT\.|EXT\.|INT/EXT\.|I/E\.)\s+(.+?)(?:\s+[-\u2013\u2014]\s+|\s+)(DAY|NIGHT|DAWN|DUSK|MORNING|EVENING|CONTINUOUS|LATER)?\s*$",
@@ -60,14 +103,14 @@ def _guess_themes(text: str) -> list[str]:
 
 
 def parse_screenplay(raw: str, title_hint: str = "") -> ScriptBreakdown:
-    """Deterministic production-format parser. No AI. Used as an ADK tool."""
+    """Deterministic screenplay parser."""
     text = raw.strip()
     if not text:
         raise ValueError("Empty screenplay or logline.")
 
     lines = [ln.rstrip() for ln in text.splitlines()]
     first = next((ln.strip() for ln in lines if ln.strip()), "Untitled")
-    title = title_hint.strip() or (first.title() if len(first) < 80 else "Untitled Kissa")
+    title = title_hint.strip() or (first.title() if len(first) < 80 else "Untitled Qissa")
 
     scenes: list[SceneBeat] = []
     characters: list[str] = []
@@ -162,4 +205,95 @@ def parse_screenplay(raw: str, title_hint: str = "") -> ScriptBreakdown:
         vfx_flags=vfx_flags[:12],
         page_estimate=page_estimate,
         raw_excerpt=text[:1500],
+    )
+
+
+def score_complexity(breakdown: ScriptBreakdown) -> ComplexityReport:
+    """Score schedule and budget risk for screenplay structures."""
+    location_count = len(breakdown.locations) or 1
+    night = breakdown.night_scenes
+    vfx = len(breakdown.vfx_flags)
+    cast = len(breakdown.characters)
+    pages = breakdown.page_estimate
+    ext = breakdown.ext_count
+
+    score = 12
+    drivers: list[str] = []
+    cuts: list[str] = []
+
+    if location_count >= 8:
+        score += 28
+        drivers.append(f"{location_count} distinct locations — each move burns coverage.")
+        cuts.append("Collapse satellite locations into two hero interiors + one exterior block.")
+    elif location_count >= 4:
+        score += 16
+        drivers.append(f"{location_count} locations. Fine if they cluster; fatal if they scatter.")
+        cuts.append("Shoot same-block locations as one company day.")
+    else:
+        score += 4
+        drivers.append(f"{location_count} location(s) — contained, which audiences of tactile drama reward.")
+
+    if night >= 5:
+        score += 22
+        drivers.append(f"{night} night scenes. Night is a budget multiplier, not a mood.")
+        cuts.append("Convert exposition nights to practical-interior night.")
+    elif night >= 2:
+        score += 10
+        drivers.append(f"{night} night scenes. Budget the night shifts carefully.")
+
+    if vfx:
+        score += min(24, 6 * vfx)
+        drivers.append(f"{vfx} VFX-leaning beats. Unplanned comps are the most expensive shots.")
+        cuts.append("Decide the VFX approach in prep: locked plate vs. in-camera sound gag.")
+
+    if cast >= 10:
+        score += 14
+        drivers.append(f"{cast} speaking characters. Availability slips the schedule.")
+        cuts.append("Merge one-scene characters into existing roles.")
+    elif cast >= 6:
+        score += 6
+
+    if ext >= 6:
+        score += 8
+        drivers.append("Exterior-heavy. Weather is an uncredited producer.")
+        cuts.append("Build a cover-set interior for every exterior day.")
+
+    if pages > 30 and location_count + night > 8:
+        score += 10
+        drivers.append("Page count plus logistics look like an overscoped schedule.")
+
+    score = min(100, score)
+
+    if score >= 70:
+        verdict = "RED — lock fewer moving parts before you raise or schedule."
+    elif score >= 40:
+        verdict = "AMBER — shootable if you cut two locations or two nights."
+    else:
+        verdict = "GREEN — contained enough that taste, not logistics, is the risk."
+
+    groups_map: dict[tuple[str, str], list[int]] = defaultdict(list)
+    for scene in breakdown.scenes:
+        key = (scene.location or "UNSPECIFIED", scene.day_night or "ANY")
+        groups_map[key].append(scene.index)
+
+    shooting_groups = [
+        {
+            "location": loc,
+            "time_of_day": tod,
+            "scenes": idxs,
+            "note": "Keep this block together. Do not interleave another company move.",
+        }
+        for (loc, tod), idxs in groups_map.items()
+    ]
+    shooting_groups.sort(key=lambda g: g["scenes"][0] if g["scenes"] else 0)
+
+    if not cuts:
+        cuts.append("Protect the must-have emotional scene first. Coverage second.")
+
+    return ComplexityReport(
+        score=score,
+        verdict=verdict,
+        drivers=drivers,
+        cuts=cuts,
+        shooting_groups=shooting_groups[:12],
     )

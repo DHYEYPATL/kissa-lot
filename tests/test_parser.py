@@ -1,13 +1,12 @@
 import unittest
 from pathlib import Path
 
-from kissa_lot.tools.complexity import score_complexity
-from kissa_lot.tools.script_parse import parse_screenplay
+from qissa.parser import parse_screenplay, score_complexity
 
 
 class ParserTests(unittest.TestCase):
     def test_night_kitchen(self):
-        raw = (Path(__file__).resolve().parents[1] / "examples" / "night_kitchen.fountain").read_text()
+        raw = (Path(__file__).resolve().parents[1] / "examples" / "night_kitchen.fountain").read_text(encoding="utf-8")
         breakdown = parse_screenplay(raw, title_hint="Night Kitchen")
         self.assertEqual(breakdown.title, "Night Kitchen")
         self.assertIn("Surat Dhaba Kitchen", breakdown.locations)

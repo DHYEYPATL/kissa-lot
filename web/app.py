@@ -68,7 +68,6 @@ def open_lot(
     sid = session_id.strip() or uuid.uuid4().hex
     state = run_desk(seed, genre=genre, title=title, owned_fact=owned_fact)
     SESSIONS[sid] = state
-    SESSIONS["current"] = state  # Fallback for single-client tooling
     
     data = state.model_dump()
     data["session_id"] = sid
@@ -82,19 +81,18 @@ def gate(
     session_id: str = Form(""),
 ) -> JSONResponse:
     sid = session_id.strip()
-    state = SESSIONS.get(sid) if sid else None
-    if state is None:
-        state = SESSIONS.get("current")
-    if state is None:
-        return JSONResponse({"error": "No series active on this lot session."}, status_code=400)
+    if not sid or sid not in SESSIONS:
+        return JSONResponse(
+            {"error": "Session not found or expired. Please open a new story lot."},
+            status_code=404,
+        )
     
+    state = SESSIONS[sid]
     state = human_gate(state, action, note)
-    if sid:
-        SESSIONS[sid] = state
-    SESSIONS["current"] = state
+    SESSIONS[sid] = state
     
     data = state.model_dump()
-    data["session_id"] = sid or "current"
+    data["session_id"] = sid
     return JSONResponse(data)
 
 
@@ -102,12 +100,10 @@ def gate(
 def packet(session_id: str = Query("")) -> PlainTextResponse:
     """One-page GO / NO-GO a producer can paste into Slack."""
     sid = session_id.strip()
-    state = SESSIONS.get(sid) if sid else None
-    if state is None:
-        state = SESSIONS.get("current")
-    if state is None:
-        return PlainTextResponse("No series active on the lot.", status_code=400)
+    if not sid or sid not in SESSIONS:
+        return PlainTextResponse("Session not found or expired. Please open a story lot.", status_code=404)
     
+    state = SESSIONS[sid]
     lines = [
         f"QISSA STUDIO — {state.title}",
         f"STATUS: {state.status}",

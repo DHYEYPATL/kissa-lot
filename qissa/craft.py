@@ -102,8 +102,8 @@ def scout_trends(seed: str, genre: str) -> TrendBrief:
 
 def _default_branches(state: SeriesState) -> dict[str, Episode]:
     """Pure branches backfill. Does NOT clobber state.episodes, bible, or characters."""
-    title_a = f"Keep the {state.owned_fact[:20] if state.owned_fact else 'Secret'}"
-    title_b = f"Confront the Truth"
+    title_a = "Keep the Secret Hidden"
+    title_b = "Confront the Truth on Mic"
     return {
         "keep": Episode(
             number=2,

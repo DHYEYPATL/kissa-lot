@@ -1,11 +1,14 @@
 import unittest
 from unittest.mock import patch
 
+from fastapi.testclient import TestClient
+
 from qissa.catalog import bucket_bar
 from qissa.craft import showrun
 from qissa.eval_harness import run_eval
 from qissa.pipeline import human_gate, run_desk
 from qissa.state import Character, Episode, SeriesState
+from web.app import app, SESSIONS
 
 
 class QissaTests(unittest.TestCase):
@@ -103,25 +106,35 @@ class QissaTests(unittest.TestCase):
         self.assertIn("canon drift", issues)
 
     def test_session_isolation(self):
-        """Verifies that session IDs maintain separate state."""
-        try:
-            from web.app import SESSIONS, open_lot
-            res_a = open_lot(seed="Idea A", genre="mythic thriller", session_id="user-a")
-            self.assertIn("user-a", SESSIONS)
-            res_b = open_lot(seed="Idea B", genre="campus dark romance", session_id="user-b")
-            self.assertIn("user-b", SESSIONS)
-            self.assertNotEqual(SESSIONS["user-a"].genre, SESSIONS["user-b"].genre)
-            self.assertEqual(SESSIONS["user-a"].genre, "mythic thriller")
-            self.assertEqual(SESSIONS["user-b"].genre, "campus dark romance")
-        except ImportError:
-            # When running in minimal sandbox without FastAPI installed
-            sessions = {}
-            state_a = run_desk("Idea A", genre="mythic thriller")
-            sessions["user-a"] = state_a
-            state_b = run_desk("Idea B", genre="campus dark romance")
-            sessions["user-b"] = state_b
-            self.assertEqual(sessions["user-a"].genre, "mythic thriller")
-            self.assertEqual(sessions["user-b"].genre, "campus dark romance")
+        """Verifies that web/app.py maintains separate state and rejects unknown sessions."""
+        client = TestClient(app)
+
+        # User A opens a lot
+        res_a = client.post("/api/open", data={"seed": "A telegraph lineman in Pune", "genre": "mythic thriller", "session_id": "user-a"})
+        self.assertEqual(res_a.status_code, 200)
+        self.assertEqual(res_a.json()["genre"], "mythic thriller")
+        self.assertEqual(res_a.json()["session_id"], "user-a")
+
+        # User B opens a lot
+        res_b = client.post("/api/open", data={"seed": "A campus rumor in Bangalore", "genre": "campus dark romance", "session_id": "user-b"})
+        self.assertEqual(res_b.status_code, 200)
+        self.assertEqual(res_b.json()["genre"], "campus dark romance")
+        self.assertEqual(res_b.json()["session_id"], "user-b")
+
+        # Verify state in memory is distinct
+        self.assertEqual(SESSIONS["user-a"].genre, "mythic thriller")
+        self.assertEqual(SESSIONS["user-b"].genre, "campus dark romance")
+
+        # User A directs rewrite on their own story
+        res_gate = client.post("/api/gate", data={"action": "direct", "note": "Make it darker", "session_id": "user-a"})
+        self.assertEqual(res_gate.status_code, 200)
+        self.assertEqual(res_gate.json()["session_id"], "user-a")
+        self.assertEqual(SESSIONS["user-b"].cycle, 0)  # User B unaffected
+
+        # Unknown session ID must return 404 error, NEVER leak User A's or User B's state
+        res_unknown = client.post("/api/gate", data={"action": "approve", "session_id": "nonexistent-session"})
+        self.assertEqual(res_unknown.status_code, 404)
+        self.assertIn("not found or expired", res_unknown.json()["error"])
 
 
 if __name__ == "__main__":

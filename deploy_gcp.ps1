@@ -83,9 +83,9 @@ gcloud run deploy qissa-studio `
     --cpu 1 `
     --timeout 300 `
     --min-instances 0 `
-    --max-instances 3 `
+    --max-instances 1 `
     --set-secrets="GEMINI_API_KEY=GEMINI_API_KEY:latest,PARALLEL_API_KEY=PARALLEL_API_KEY:latest" `
-    --set-env-vars="GEMINI_MODEL=gemini-2.5-flash,PARALLEL_SEARCH_MODE=fast,KISSA_DEMO_MODE=false,GOOGLE_CLOUD_LOCATION=us-central1" `
+    --set-env-vars="GEMINI_MODEL=gemini-2.5-flash,PARALLEL_SEARCH_MODE=fast,GOOGLE_CLOUD_LOCATION=us-central1" `
     --quiet
 
 Write-Host "=========================================" -ForegroundColor Green

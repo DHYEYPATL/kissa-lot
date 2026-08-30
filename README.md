@@ -1,7 +1,7 @@
 # Qissa Studio
 
 **Submission product for Agentic Cinema (Parallel track).**  
-`qissa/` + `web/` + `adk_agent/` is what we enter. `kissa_lot/` is an earlier film-desk sketch in the same repo — not the submission.
+`qissa/` + `web/` + `adk_agent/` is the full production greenlight desk.
 
 **Title line:** Qissa Studio: Human-in-the-Loop Pipeline for Retention-Optimized Serialized Stories  
 **Hackathon:** Agentic Cinema: The Blockbuster Hackathon  
