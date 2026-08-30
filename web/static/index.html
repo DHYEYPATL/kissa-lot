@@ -3,74 +3,91 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Kissa Lot — development desk</title>
+  <title>Qissa Studio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Newsreader:opsz,wght@6..72,400;6..72,600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif&family=Newsreader:opsz,wght@6..72,400;6..72,600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
 <body>
   <div class="grain"></div>
   <header class="mast">
-    <div class="brand">
-      <span class="mark">KL</span>
-      <div>
-        <p class="eyebrow">Agentic Cinema · Parallel track</p>
-        <h1>Kissa Lot</h1>
-      </div>
-    </div>
-    <p class="lede">A development desk that listens to the crowd before you lock the script. Paste a kissa. The lot runs four live web searches, scores whether you can actually shoot it, and writes a greenlight packet with citations.</p>
+    <div class="brand"><span class="mark">QS</span><div>
+      <p class="eyebrow">Agentic Cinema · Parallel track · Gemini + ADK</p>
+      <h1>Qissa Studio</h1>
+    </div></div>
+    <p class="lede">A greenlight valve for serialized audio. Parallel grounds the week. Gemini drafts the bible. Twins pre-score structure. Humans keep the gate. Canary is opt-in 3% and never runs first.</p>
   </header>
-
   <main>
     <section class="slate">
-      <form id="desk">
-        <label class="field">
-          <span>Working title</span>
-          <input name="title" placeholder="Night Kitchen" value="Night Kitchen" />
+      <form id="open">
+        <label class="field"><span>Genre bucket</span>
+          <select name="genre">
+            <option>regional family drama</option>
+            <option>mythic thriller</option>
+            <option>campus dark romance</option>
+          </select>
         </label>
-        <label class="field">
-          <span>Logline, treatment, or pages</span>
-          <textarea name="pages" id="pages" rows="18">%%SAMPLE%%</textarea>
+        <label class="field"><span>Seed or stalled catalog title</span>
+          <textarea name="seed" rows="5">A night-shift cook in Surat keeps her late mother's recipe book taped under a prep table. A food-show producer wants the pour as a clip.</textarea>
         </label>
         <div class="actions">
-          <button type="submit" id="run">Run the desk</button>
-          <p class="hint">Gemini + Parallel Search. Keys stay on the server.</p>
+          <button type="submit" id="run">Open the lot</button>
+          <p class="hint">Paste "Night Shift Surat" or "Files Without Faces" to run catalog rescue.</p>
         </div>
       </form>
       <ol class="ticker" id="ticker" hidden></ol>
     </section>
-
-    <section class="packet" id="packet" hidden>
-      <article class="verdict-card" id="verdict"></article>
+    <section id="board" hidden>
+      <p class="meta" id="status"></p>
       <div class="grid">
         <article>
-          <h2>Audience desire</h2>
-          <p id="desire"></p>
+          <h2>Trend brief (Parallel)</h2>
+          <div id="trend"></div>
         </article>
         <article>
-          <h2>Why this, now</h2>
-          <p id="whynow"></p>
+          <h2>Payoff ledger</h2>
+          <p id="ledger"></p>
+          <ul id="memory"></ul>
         </article>
       </div>
+      <article><h2>Bible + series memory</h2><p id="bible"></p></article>
       <article>
-        <h2>Clip moments</h2>
-        <ul id="clips"></ul>
+        <h2>Twin bench — would they spend the next coin?</h2>
+        <div id="twins" class="groups"></div>
       </article>
       <article>
-        <h2>Cut list / shooting groups</h2>
-        <p id="complexity"></p>
-        <ul id="cuts"></ul>
-        <div id="groups" class="groups"></div>
+        <h2>Canary valve</h2>
+        <p id="canary"></p>
+        <div id="heat" class="groups"></div>
       </article>
-      <article>
-        <h2>Citations from Parallel</h2>
-        <ul id="cites" class="cites"></ul>
+      <article><h2>Structural diagnosis</h2><ul id="dx"></ul></article>
+      <div class="grid">
+        <article><h2>Episode 1</h2><pre id="script"></pre></article>
+        <article>
+          <h2>Before / after</h2>
+          <pre id="ba"></pre>
+          <h2>Interactive branches</h2>
+          <div id="branches" class="groups"></div>
+        </article>
+      </div>
+      <article class="slate">
+        <h2>Human gate — nothing publishes without this</h2>
+        <textarea id="note" rows="3" placeholder="Give her a costly choice before minute 6."></textarea>
+        <div class="actions">
+          <button data-act="direct" type="button">Direct rewrite</button>
+          <button data-act="approve" type="button">Approve → 3% canary</button>
+          <button data-act="reject" type="button">Archive + brief</button>
+        </div>
       </article>
+      <div class="grid">
+        <article><h2>Originality (similarity, not a lawsuit)</h2><ul id="orig"></ul></article>
+        <article><h2>Ad-safe tags — after the beat, never mid-sentence</h2><ul id="ads"></ul></article>
+      </div>
+      <article><h2>Parallel citations</h2><ul id="cites" class="cites"></ul></article>
     </section>
   </main>
-
   <footer>
-    <p>Built for Google Cloud Agentic Cinema. Runtime: <code>google-genai</code> + <code>google-adk</code> + <code>parallel-web</code>.</p>
+    <p>Not a novelist. A greenlight valve. Runtime: <code>google-genai</code> + <code>google-adk</code> + <code>parallel-web</code>. Failed bets become archives, not landfill.</p>
   </footer>
   <script src="/static/app.js"></script>
 </body>
