@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kissa Lot — development desk</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Newsreader:opsz,wght@6..72,400;6..72,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="grain"></div>
+  <header class="mast">
+    <div class="brand">
+      <span class="mark">KL</span>
+      <div>
+        <p class="eyebrow">Agentic Cinema · Parallel track</p>
+        <h1>Kissa Lot</h1>
+      </div>
+    </div>
+    <p class="lede">A development desk that listens to the crowd before you lock the script. Paste a kissa. The lot runs four live web searches, scores whether you can actually shoot it, and writes a greenlight packet with citations.</p>
+  </header>
+
+  <main>
+    <section class="slate">
+      <form id="desk">
+        <label class="field">
+          <span>Working title</span>
+          <input name="title" placeholder="Night Kitchen" value="Night Kitchen" />
+        </label>
+        <label class="field">
+          <span>Logline, treatment, or pages</span>
+          <textarea name="pages" id="pages" rows="18">%%SAMPLE%%</textarea>
+        </label>
+        <div class="actions">
+          <button type="submit" id="run">Run the desk</button>
+          <p class="hint">Gemini + Parallel Search. Keys stay on the server.</p>
+        </div>
+      </form>
+      <ol class="ticker" id="ticker" hidden></ol>
+    </section>
+
+    <section class="packet" id="packet" hidden>
+      <article class="verdict-card" id="verdict"></article>
+      <div class="grid">
+        <article>
+          <h2>Audience desire</h2>
+          <p id="desire"></p>
+        </article>
+        <article>
+          <h2>Why this, now</h2>
+          <p id="whynow"></p>
+        </article>
+      </div>
+      <article>
+        <h2>Clip moments</h2>
+        <ul id="clips"></ul>
+      </article>
+      <article>
+        <h2>Cut list / shooting groups</h2>
+        <p id="complexity"></p>
+        <ul id="cuts"></ul>
+        <div id="groups" class="groups"></div>
+      </article>
+      <article>
+        <h2>Citations from Parallel</h2>
+        <ul id="cites" class="cites"></ul>
+      </article>
+    </section>
+  </main>
+
+  <footer>
+    <p>Built for Google Cloud Agentic Cinema. Runtime: <code>google-genai</code> + <code>google-adk</code> + <code>parallel-web</code>.</p>
+  </footer>
+  <script src="/static/app.js"></script>
+</body>
+</html>
