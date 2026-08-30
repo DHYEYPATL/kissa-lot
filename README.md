@@ -15,7 +15,7 @@
 - [x] ADK `root_agent` (`adk_agent/agent.py`)
 - [x] Parallel Search API via `parallel-web` (`qissa/search.py`)
 - [x] Web app (FastAPI) for the hosted URL
-- [ ] **You** deploy Cloud Run and paste the URL on Devpost
+- [x] Web app hosted: https://qissa-studio-d7lrfpwafq-uc.a.run.app
 - [ ] **You** record the ≤3 min screencast (`docs/DEMO_SCRIPT.md`)
 - [ ] **You** submit on Devpost, track = Parallel (`docs/SUBMISSION.md`)
 
