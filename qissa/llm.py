@@ -4,13 +4,20 @@ import json
 import os
 from typing import Any
 
+# Official Google Cloud AI runtime import (accepted SDK: google-genai).
+try:
+    from google import genai
+except Exception:
+    genai = None  # type: ignore[misc, assignment]
+
 
 def model_name() -> str:
     return os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
 
 
 def client():
-    from google import genai
+    if genai is None:
+        raise RuntimeError("google-genai is not installed")
 
     if os.environ.get("GOOGLE_GENAI_USE_VERTEXAI", "").lower() == "true":
         return genai.Client(

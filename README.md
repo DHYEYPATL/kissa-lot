@@ -1,10 +1,25 @@
 # Qissa Studio
 
-**Title line:** Qissa Studio: Human-in-the-Loop Pipeline for Retention-Optimized Serialized Stories
-**Hackathon:** Agentic Cinema: The Blockbuster Hackathon
-**Track:** Parallel
-**Repo:** https://github.com/DHYEYPATL/kissa-lot
-**License:** MIT
+**Submission product for Agentic Cinema (Parallel track).**  
+`qissa/` + `web/` + `adk_agent/` is what we enter. `kissa_lot/` is an earlier film-desk sketch in the same repo — not the submission.
+
+**Title line:** Qissa Studio: Human-in-the-Loop Pipeline for Retention-Optimized Serialized Stories  
+**Hackathon:** Agentic Cinema: The Blockbuster Hackathon  
+**Track:** Parallel  
+**Repo:** https://github.com/DHYEYPATL/kissa-lot  
+**License:** MIT (file at repo root — confirm it shows in GitHub About)
+
+### Stage One checklist
+- [x] Public repo + MIT + run instructions
+- [x] Gemini via `google-genai` (`qissa/llm.py`)
+- [x] ADK `root_agent` (`adk_agent/agent.py`)
+- [x] Parallel Search API via `parallel-web` (`qissa/search.py`)
+- [x] Web app (FastAPI) for the hosted URL
+- [ ] **You** deploy Cloud Run and paste the URL on Devpost
+- [ ] **You** record the ≤3 min screencast (`docs/DEMO_SCRIPT.md`)
+- [ ] **You** submit on Devpost, track = Parallel (`docs/SUBMISSION.md`)
+
+Rules map: `docs/COMPLIANCE.md`.
 
 A qissa is a story. Qissa Studio does not replace writers. It de-risks greenlight for serialized audio.
 
