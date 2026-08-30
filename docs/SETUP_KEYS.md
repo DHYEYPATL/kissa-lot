@@ -24,7 +24,7 @@ Put the key in `PARALLEL_API_KEY`.
 ## 4. Hosting
 
 ```bash
-gcloud run deploy kissa-lot --source . --region us-central1 --allow-unauthenticated
+gcloud run deploy qissa-studio --source . --region us-central1 --allow-unauthenticated
 ```
 
 The hosted URL goes on the Devpost form.

@@ -20,7 +20,7 @@ and pass us in thirty seconds if we did not.
 | Parallel Search API, not README sticker | PASS | Official `parallel-web` SDK. Fallback only if key missing. |
 | Media / entertainment workflow | PASS | Serialized-audio greenlight for writers + studio desks |
 | Audience: filmmakers, screenwriters, studio crews, or fans | PASS | Screenwriters / audio editors / development desks |
-| Public repo | PASS | https://github.com/DHYEYPATL/kissa-lot |
+| Public repo | PASS | https://github.com/DHYEYPATL/Qissa-Studio |
 | Complete OSS license at repo root | PASS | `LICENSE` MIT |
 | Instructions to run | PASS | README |
 | No banned AI (OpenAI, Anthropic, other agent frameworks) | PASS | Grep-clean. No LangGraph / CrewAI / LangChain agent loop |

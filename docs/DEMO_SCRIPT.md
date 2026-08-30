@@ -6,7 +6,7 @@ Judges watch the video first. Show the app. Say the sentence. Click the gate.
 
 0:18–0:48 Paste the Surat kitchen seed. Open the lot. Point at Parallel citations if live, or say "offline fallback — same packet." Point at rising vs saturated tropes.
 
-0:48–1:18 Twin bench. "Meera drops if no choice by minute 8. Rhea will not spend the next coin if the wound never pays. This is not a trained model of Pocket FM. It is a cheap kill-filter."
+0:48–1:18 Twin bench. "Meera drops if no choice by minute 8. Rhea will not spend the next coin if the wound never pays. This is not a trained clone of any catalog. It is a cheap kill-filter."
 
 1:18–1:38 Payoff ledger + diagnosis. Name one structural edit. Point at ad-safe tag sitting *after* the turn, not inside a line.
 

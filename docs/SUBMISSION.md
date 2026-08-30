@@ -6,7 +6,7 @@
 
 **Track:** Parallel
 
-**Repo:** https://github.com/DHYEYPATL/kissa-lot
+**Repo:** https://github.com/DHYEYPATL/Qissa-Studio
 
 **License:** MIT (file at repo root)
 
@@ -20,7 +20,7 @@ google-genai, google-adk, google-cloud-aiplatform, parallel-web, FastAPI, Cloud 
 
 ## Description
 
-Qissa Studio is a greenlight valve for serialized audio, the Pocket-FM-shaped desk where a flop is weeks of bible work and most drop-off is structural.
+Qissa Studio is a greenlight valve for serialized audio. A flop is weeks of bible work; most drop-off is structural.
 
 Parallel Search grounds a trend brief (rising vs saturated tropes, regional moments, listener pains) and a near-duplicate sweep. Gemini drafts the bible, characters, episode 1, and the keep/tell branches. Seven digital-twin personas pre-score the draft against minute-level behaviors — skip after 90 seconds of exposition, stay if a costly choice lands before minute 8, refuse a coin if the last 170 episodes never paid a wound. A human must approve, reject, or direct in natural language. Only approve starts a simulated 3% opt-in canary, scored against the *hit* bar in the same genre bucket. Failures leave an archive and a rework brief. Generation is the easy part. The product is what we refuse to publish.
 

@@ -6,7 +6,7 @@
 **Title line:** Qissa Studio: Human-in-the-Loop Pipeline for Retention-Optimized Serialized Stories  
 **Hackathon:** Agentic Cinema: The Blockbuster Hackathon  
 **Track:** Parallel  
-**Repo:** https://github.com/DHYEYPATL/kissa-lot  
+**Repo:** https://github.com/DHYEYPATL/Qissa-Studio  
 **License:** MIT (file at repo root — confirm it shows in GitHub About)
 
 ### Stage One checklist
@@ -36,7 +36,7 @@ Generation is the easy part. The product is what we refuse to publish, and how f
 
 ## Why this, not another writer bot
 
-Pocket FM-shaped desks already know acquisition is not the problem. Long-term retention is. Episodes live at 11–15 minutes. Listeners binge. They also drop when structure fails: late agency, unpaid mystery piles, mid-sentence ads, generated coffee talk, coin walls after the hook, 174 episodes of the same wound. Regional and niche shows die in committee because a flop is expensive.
+Serialized-audio desks already know acquisition is not the problem. Long-term retention is. Episodes live at 11–15 minutes. Listeners binge. They also drop when structure fails: late agency, unpaid mystery piles, mid-sentence ads, generated coffee talk, coin walls after the hook, 174 episodes of the same wound. Regional and niche shows die in committee because a flop is expensive.
 
 If we only ship "Gemini writes episode 1," we lose this hackathon. The loop is the invention.
 
@@ -86,7 +86,7 @@ Tests: `python -m unittest tests.test_qissa tests.test_parser -v`
 
 - Technological implementation: Parallel in `qissa/search.py`. Gemini in `qissa/llm.py`. ADK tools wrap the same graph. `/health` prints the eval harness.
 - Design: studio floor — trend, ledger, twins with coin-willingness, heatmap, diagnosis, before/after, human box, branches.
-- Impact: greenlight and salvage for Pocket-FM-shaped desks. Failed series become briefs.
+- Impact: greenlight and salvage for serialized-audio desks. Failed series become briefs.
 - Idea quality: test structure before production cost. Partner used as live trend grounding *and* near-duplicate search.
 
 ## Demo

@@ -3,7 +3,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "kissa-lot"
+name = "qissa-studio"
 version = "2.1.0"
 description = "Qissa Studio: human-in-the-loop greenlight loop for serialized audio (Agentic Cinema, Parallel track)."
 readme = "README.md"
