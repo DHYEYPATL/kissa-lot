@@ -8,6 +8,7 @@ from fastapi import FastAPI, Form
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
+from qissa.catalog import CATALOG, bucket_bar, stalled_shows
 from qissa.eval_harness import run_eval
 from qissa.pipeline import human_gate, run_desk
 from qissa.state import SeriesState
@@ -17,7 +18,7 @@ load_dotenv()
 ROOT = Path(__file__).resolve().parent
 SESSIONS: dict[str, SeriesState] = {}
 
-app = FastAPI(title="Qissa Studio", version="2.0.0")
+app = FastAPI(title="Qissa Studio", version="2.1.0")
 app.mount("/static", StaticFiles(directory=str(ROOT / "static")), name="static")
 
 
@@ -27,15 +28,30 @@ def health() -> dict:
         "ok": True,
         "product": "Qissa Studio",
         "track": "Parallel",
-        "gemini": bool(os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_GENAI_USE_VERTEXAI") == "true"),
+        "gemini": bool(
+            os.environ.get("GEMINI_API_KEY")
+            or os.environ.get("GOOGLE_GENAI_USE_VERTEXAI") == "true"
+        ),
         "parallel": bool(os.environ.get("PARALLEL_API_KEY")),
         "eval": run_eval(),
+        "runtime": {
+            "google_genai": "qissa/llm.py",
+            "google_adk": "adk_agent/agent.py",
+            "parallel_web": "qissa/search.py",
+        },
     }
 
 
 @app.get("/", response_class=HTMLResponse)
 def index() -> str:
     return (ROOT / "static" / "index.html").read_text(encoding="utf-8")
+
+
+@app.get("/api/catalog")
+def catalog() -> dict:
+    return {"catalog": CATALOG, "bars": {
+        g: bucket_bar(g) for g in sorted({r["genre"] for r in CATALOG})
+    }, "stalled": stalled_shows()}
 
 
 @app.post("/api/open")
