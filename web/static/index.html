@@ -3,112 +3,495 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Qissa Studio</title>
+  <title>Qissa Studio — Serialized Audio Greenlight Desk</title>
+  <meta name="description" content="Human-in-the-loop retention desk for serialized audio stories. Test pacing, twins, and structure before production spend." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif&family=Newsreader:opsz,wght@6..72,400;6..72,600&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
 <body>
-  <div class="grain"></div>
-  <header class="mast">
-    <div class="brand"><span class="mark">QS</span><div>
-      <p class="eyebrow">Agentic Cinema · Parallel track · Gemini + ADK</p>
-      <h1>Qissa Studio</h1>
-    </div></div>
-    <p class="lede">You have a story idea for earphones. Before you hire actors, this desk tells you: keep going, fix this beat, or stop. You still decide. It does not publish anything by itself.</p>
+  <!-- Ambient Audio Studio Texture -->
+  <div class="studio-grain"></div>
+
+  <header class="studio-header">
+    <div class="container header-inner">
+      <div class="brand-block">
+        <div class="studio-emblem">
+          <span class="emblem-glyph">QS</span>
+          <div class="emblem-indicator active" title="System Live"></div>
+        </div>
+        <div class="brand-meta">
+          <div class="brand-badges">
+            <span class="badge-tag">Parallel Track</span>
+            <span class="badge-tag">Gemini 2.5</span>
+            <span class="badge-tag">Google ADK</span>
+            <span class="badge-tag live-badge"><span class="pulse-dot"></span> Desk Active</span>
+          </div>
+          <h1 class="studio-title">Qissa Studio</h1>
+          <p class="studio-subtitle">The Greenlight Desk for Serialized Audio · Stop burning money on scripts that die in minute 8</p>
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <a href="#pitch-desk" class="btn btn-secondary btn-sm" id="btn-new-lot">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          New Story Lot
+        </a>
+        <a href="/api/catalog" target="_blank" class="btn btn-ghost btn-sm" title="View catalog benchmark bars">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10M6 10h10"/></svg>
+          Hit Catalog
+        </a>
+      </div>
+    </div>
   </header>
-  <main>
-    <section class="slate">
-      <form id="open">
-        <label class="field"><span>Genre bucket</span>
-          <select name="genre">
-            <option>regional family drama</option>
-            <option>mythic thriller</option>
-            <option>campus dark romance</option>
-          </select>
-        </label>
-        <label class="field"><span>Seed or stalled catalog title</span>
-          <textarea name="seed" rows="4">A night-shift cook in Surat keeps her late mother's recipe book taped under a prep table. A food-show producer wants the pour as a clip.</textarea>
-        </label>
-        <label class="field"><span>Owned fact (required for uniqueness — a wage, a street, a smell only you know)</span>
-          <textarea name="owned_fact" rows="2">The tape under the table still smells like asafetida from last Undhiyu season.</textarea>
-        </label>
-        <div class="actions">
-          <button type="submit" id="run">Test this idea</button>
-          <p class="hint">One idea + one fact only you know. Then we say go, fix, or stop.</p>
+
+  <main class="container main-content">
+    
+    <!-- Quick Guided Workflow Stepper -->
+    <nav class="workflow-stepper">
+      <div class="step active" id="step-pill-1">
+        <span class="step-num">01</span>
+        <span class="step-info">
+          <strong>Story Pitch & Fact</strong>
+          <small>Seed & unique lived detail</small>
+        </span>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step" id="step-pill-2">
+        <span class="step-num">02</span>
+        <span class="step-info">
+          <strong>Twin Bench & Pacing</strong>
+          <small>7 listeners & drop timers</small>
+        </span>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step" id="step-pill-3">
+        <span class="step-num">03</span>
+        <span class="step-info">
+          <strong>Editor Gate & Canary</strong>
+          <small>Rewrite, 3% canary, or brief</small>
+        </span>
+      </div>
+    </nav>
+
+    <!-- SECTION 1: PITCH DESK (INPUT) -->
+    <section class="studio-card pitch-desk-card" id="pitch-desk">
+      <div class="card-header-bar">
+        <div class="card-title-group">
+          <span class="section-label">Story Intubation</span>
+          <h2 class="card-heading">Test a Story Idea Before Voice Production</h2>
+          <p class="card-subheading">Enter your headphone story seed and one lived detail only you know. The desk tests retention against 7 picky listener personas.</p>
+        </div>
+        
+        <!-- Preset Examples Selector -->
+        <div class="preset-group">
+          <span class="preset-label">Quick Presets:</span>
+          <div class="preset-buttons">
+            <button type="button" class="preset-btn active" data-preset="surat">🍛 Surat Kitchen</button>
+            <button type="button" class="preset-btn" data-preset="pune">📻 Pune Radio Secret</button>
+            <button type="button" class="preset-btn" data-preset="kodaikanal">🌲 Kodaikanal Rescue</button>
+            <button type="button" class="preset-btn" data-preset="whitefield">🏢 Bangalore Tech Noir</button>
+          </div>
+        </div>
+      </div>
+
+      <form id="open" class="pitch-form">
+        <div class="form-grid">
+          
+          <div class="form-col-side">
+            <label class="studio-label" for="genre-select">
+              <span class="label-text">Genre Bucket</span>
+              <span class="label-hint">Sets retention hit-bar</span>
+            </label>
+            <div class="select-wrapper">
+              <select name="genre" id="genre-select" class="studio-select">
+                <option value="regional family drama">Regional Family Drama</option>
+                <option value="mythic thriller">Mythic Thriller</option>
+                <option value="campus dark romance">Campus Dark Romance</option>
+                <option value="investigative noir">Investigative Audio Noir</option>
+              </select>
+            </div>
+
+            <div class="tip-box">
+              <div class="tip-icon">💡</div>
+              <div class="tip-content">
+                <strong>Why the Owned Fact matters:</strong>
+                <p>Generic AI writes predictable slop. A real smell, price, or street name locks the show runner into authentic local pacing.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-col-main">
+            <div class="field-wrap">
+              <label class="studio-label" for="seed-input">
+                <span class="label-text">Story Seed / Logline</span>
+                <span class="label-hint">What hook pulls earphones in the first 3 minutes?</span>
+              </label>
+              <textarea name="seed" id="seed-input" rows="3" class="studio-textarea" required placeholder="A daughter-in-law in Surat secretly runs the family tiffin kitchen after her husband dies..."></textarea>
+            </div>
+
+            <div class="field-wrap">
+              <label class="studio-label" for="fact-input">
+                <span class="label-text">The Owned Fact (Required for Uniqueness)</span>
+                <span class="label-hint">A wage, a specific smell, an address only a real person would know</span>
+              </label>
+              <input type="text" name="owned_fact" id="fact-input" class="studio-input" required placeholder="The tape under the prep table still smells like asafetida from last Undhiyu season." />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-footer">
+          <div class="submit-meta">
+            <span class="gate-warning">🔒 Human gate enabled — nothing publishes without human director review.</span>
+          </div>
+          <button type="submit" id="run" class="btn btn-primary btn-lg">
+            <span class="btn-spinner" id="btn-spin" hidden></span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <span id="btn-text">Test Story Structure & Retention</span>
+          </button>
         </div>
       </form>
-      <ol class="ticker" id="ticker" hidden></ol>
-    </section>
-    <section id="board" hidden>
-      <p class="meta" id="status"></p>
-      <div class="grid">
-        <article>
-          <h2>Trend brief (Parallel)</h2>
-          <div id="trend"></div>
-        </article>
-        <article>
-          <h2>Payoff ledger</h2>
-          <p id="ledger"></p>
-          <ul id="memory"></ul>
-        </article>
-      </div>
-      <article><h2>Bible + series memory</h2><p id="bible"></p></article>
-      <article>
-        <h2>Twin bench — would they start the next episode?</h2>
-        <div id="twins" class="groups"></div>
-      </article>
-      <article>
-        <h2>Canary valve</h2>
-        <p id="canary"></p>
-        <div id="heat" class="groups"></div>
-      </article>
-      <article><h2>Structural diagnosis</h2><ul id="dx"></ul></article>
-      <div class="grid">
-        <article><h2>Episode 1</h2><pre id="script"></pre></article>
-        <article>
-          <h2>Before / after</h2>
-          <pre id="ba"></pre>
-          <h2>Interactive branches</h2>
-          <div id="branches" class="groups"></div>
-        </article>
-      </div>
-      <article class="slate">
-        <h2>Human gate — nothing publishes without this</h2>
-        <textarea id="note" rows="3" placeholder="Give her a costly choice before minute 6."></textarea>
-        <div class="actions">
-          <button data-act="direct" type="button">Direct rewrite</button>
-          <button data-act="approve" type="button">Approve → 3% canary</button>
-          <button data-act="reject" type="button">Archive + brief</button>
-          <a href="/api/packet" target="_blank" rel="noreferrer">Download one-page brief</a>
+
+      <!-- Live Pipeline Processing Ticker -->
+      <div class="pipeline-ticker-wrap" id="ticker-wrap" hidden>
+        <div class="ticker-header">
+          <span class="pulse-dot"></span>
+          <span class="ticker-title">Running Greenlight Pipeline</span>
         </div>
-      </article>
-      <div class="grid">
-        <article><h2>Originality (similarity, not a lawsuit)</h2><ul id="orig"></ul></article>
-        <article><h2>Ad-safe tags — after the beat, never mid-sentence</h2><ul id="ads"></ul></article>
+        <ol class="ticker-steps" id="ticker"></ol>
       </div>
-      <div class="grid">
-        <article>
-          <h2>Refused first instinct</h2>
-          <p id="instinct"></p>
-          <p id="owned"></p>
-        </article>
-        <article>
-          <h2>Slop scan</h2>
-          <ul id="slop"></ul>
-        </article>
+    </section>
+
+    <!-- SECTION 2: PRODUCTION DESK RESULTS (BOARD) -->
+    <section id="board" class="production-board" hidden>
+      
+      <!-- Top Executive Verdict Banner -->
+      <div class="verdict-banner" id="verdict-card">
+        <div class="verdict-status-badge" id="verdict-pill">
+          <span class="verdict-icon">⚖️</span>
+          <span class="verdict-text" id="verdict-label">HOLD FOR HUMAN GREENLIGHT</span>
+        </div>
+        <div class="verdict-info">
+          <h2 class="verdict-story-title" id="story-title">Night Kitchen, Surat</h2>
+          <p class="verdict-logline" id="story-logline"></p>
+        </div>
+        <div class="verdict-metrics-summary">
+          <div class="metric-item">
+            <span class="metric-val" id="metric-twin-score">--</span>
+            <span class="metric-lbl">Twin Score</span>
+          </div>
+          <div class="metric-divider"></div>
+          <div class="metric-item">
+            <span class="metric-val" id="metric-first-turn">--</span>
+            <span class="metric-lbl">First Choice Beat</span>
+          </div>
+          <div class="metric-divider"></div>
+          <div class="metric-item">
+            <span class="metric-val" id="metric-payoff">--</span>
+            <span class="metric-lbl">Payoff Ratio</span>
+          </div>
+        </div>
       </div>
-      <article>
-        <h2>Booth packet — audio only, no picture</h2>
-        <pre id="booth"></pre>
-      </article>
-      <article><h2>Provenance</h2><ul id="prov"></ul></article>
-      <article><h2>Parallel citations</h2><ul id="cites" class="cites"></ul></article>
+
+      <!-- Quick Desk Navigation Tabs -->
+      <div class="desk-tabs">
+        <button class="desk-tab active" data-tab="overview">📊 Twins & Structural Health</button>
+        <button class="desk-tab" data-tab="script">📜 Episode 1 & Dialogue Reader</button>
+        <button class="desk-tab" data-tab="trends">🌐 Parallel Trend Grounding</button>
+        <button class="desk-tab" data-tab="booth">🎙️ Voice Casting & Booth Packet</button>
+      </div>
+
+      <!-- TAB 1: EXECUTIVE OVERVIEW & TWIN BENCH -->
+      <div class="tab-panel active" id="tab-overview">
+        
+        <!-- Pacing & Retention Timeline Visualizer -->
+        <div class="studio-card timeline-card">
+          <div class="card-head-compact">
+            <div class="card-head-title">
+              <span class="section-label">Retention Waveform</span>
+              <h3>12-Minute Episode 1 Pacing Breakdown</h3>
+            </div>
+            <span class="badge-tag" id="turn-badge">Costly Turn: Minute 5.0</span>
+          </div>
+          <div class="timeline-visualizer">
+            <div class="timeline-bar">
+              <div class="timeline-track">
+                <div class="timeline-segment expo-zone" style="width: 15%;" title="Exposition / World Intro">
+                  <span class="segment-label">0–1.5m Intro</span>
+                </div>
+                <div class="timeline-segment build-zone" style="width: 25%;" title="Tension Build">
+                  <span class="segment-label">1.5–5m Pressure</span>
+                </div>
+                <div class="timeline-segment turn-zone" style="width: 25%;" title="Costly Choice Turn">
+                  <span class="segment-label">★ 5m Costly Turn</span>
+                </div>
+                <div class="timeline-segment pay-zone" style="width: 20%;" title="Consequence & Secret">
+                  <span class="segment-label">8–10m Secret</span>
+                </div>
+                <div class="timeline-segment cliff-zone" style="width: 15%;" title="Cliffhanger & Hook">
+                  <span class="segment-label">⚡ 11.5m Hook</span>
+                </div>
+              </div>
+              <div class="timeline-markers" id="timeline-markers"></div>
+            </div>
+            <div class="timeline-legend">
+              <span class="legend-item"><span class="legend-dot dot-safe"></span> Ad-Safe Beat (After emotional turn)</span>
+              <span class="legend-item"><span class="legend-dot dot-drop"></span> Listener Drop Risk Check</span>
+              <span class="legend-item"><span class="legend-dot dot-cliff"></span> Coin Cliffhanger</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 7 Listener Twin Personas Grid -->
+        <div class="studio-card">
+          <div class="card-head-compact">
+            <div class="card-head-title">
+              <span class="section-label">Digital Twin Bench</span>
+              <h3>Pre-Scoring Against 7 Listener Behaviors</h3>
+            </div>
+            <span class="badge-tag">Simulated Kill-Filter</span>
+          </div>
+          <p class="card-description">Each twin represents real listener cohorts. If a script drags past 90 seconds without a choice or abuses coin walls, they drop immediately.</p>
+          <div class="twins-grid" id="twins-cards"></div>
+        </div>
+
+        <!-- Payoff Ledger & Structural Diagnoses -->
+        <div class="grid-2col">
+          
+          <!-- Payoff Ledger -->
+          <div class="studio-card">
+            <div class="card-head-compact">
+              <div class="card-head-title">
+                <span class="section-label">Series Integrity</span>
+                <h3>Payoff Ledger</h3>
+              </div>
+            </div>
+            <div class="ledger-stat-box">
+              <div class="ledger-stat-num" id="ledger-ratio">0.5</div>
+              <div class="ledger-stat-desc">
+                <strong>Pay-One-Leave-One Rule</strong>
+                <p id="ledger-rule">Pay one mystery. Leave one open. Never 170 episodes of the same unresolved wound.</p>
+              </div>
+            </div>
+            <div class="ledger-threads" id="ledger-threads"></div>
+          </div>
+
+          <!-- Structural Diagnoses & Originality -->
+          <div class="studio-card">
+            <div class="card-head-compact">
+              <div class="card-head-title">
+                <span class="section-label">Script Critic</span>
+                <h3>Structural Diagnoses & Near-Duplicates</h3>
+              </div>
+            </div>
+            <div class="diagnoses-list" id="dx-list"></div>
+            
+            <div class="originality-box">
+              <div class="sub-head">Parallel Near-Duplicate & Plagiarism Check</div>
+              <ul class="clean-list" id="orig-list"></ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Canary Valve Status -->
+        <div class="studio-card canary-card">
+          <div class="card-head-compact">
+            <div class="card-head-title">
+              <span class="section-label">Canary Valve</span>
+              <h3>Opt-in 3% Listener Canary Simulation</h3>
+            </div>
+            <span class="badge-tag" id="canary-status-pill">Blocked: Awaiting Human Gate</span>
+          </div>
+          <div class="canary-body">
+            <p id="canary-desc" class="canary-desc"></p>
+            <div class="canary-metrics-grid" id="canary-stats" hidden>
+              <div class="canary-stat"><span class="val" id="c-comp">--</span><span class="lbl">Completion</span></div>
+              <div class="canary-stat"><span class="val" id="c-next">--</span><span class="lbl">Next Ep Start</span></div>
+              <div class="canary-stat"><span class="val" id="c-skip">--</span><span class="lbl">Skip Rate</span></div>
+              <div class="canary-stat"><span class="val" id="c-vs">--</span><span class="lbl">vs Hit Bar</span></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- TAB 2: EPISODE SCRIPT & INTERACTIVE BRANCHES -->
+      <div class="tab-panel" id="tab-script">
+        <div class="grid-2col">
+          
+          <!-- Episode 1 Script Viewer -->
+          <div class="studio-card script-viewer-card">
+            <div class="card-head-compact">
+              <div class="card-head-title">
+                <span class="section-label">Episode 1 Screenplay</span>
+                <h3 id="ep1-title">Episode 1 Script</h3>
+              </div>
+              <span class="badge-tag">Audio-Only Format</span>
+            </div>
+            <div class="script-reader" id="script-formatted"></div>
+          </div>
+
+          <!-- Rewrite Comparison & Interactive Episode 2 Branches -->
+          <div class="script-side-panel">
+            
+            <!-- Before vs After Rewrite Diff -->
+            <div class="studio-card">
+              <div class="card-head-compact">
+                <div class="card-head-title">
+                  <span class="section-label">Editorial Patch</span>
+                  <h3>Director Rewrite Diff</h3>
+                </div>
+              </div>
+              <div class="ba-diff-box" id="ba-diff">
+                <p class="empty-state">Use the Human Gate below to direct a rewrite (e.g. <em>"Make Meera confront the producer at minute 4"</em>) to see the live patch.</p>
+              </div>
+            </div>
+
+            <!-- Interactive Episode 2 Branches -->
+            <div class="studio-card">
+              <div class="card-head-compact">
+                <div class="card-head-title">
+                  <span class="section-label">Episode 2 Branching</span>
+                  <h3>Keep vs. Tell Twin Scoring</h3>
+                </div>
+              </div>
+              <p class="card-description">Twin personas pre-test branching paths so writers know which fork retains more subscribers.</p>
+              <div class="branches-grid" id="branches-list"></div>
+            </div>
+
+            <!-- Ad-Safe Placements -->
+            <div class="studio-card">
+              <div class="card-head-compact">
+                <div class="card-head-title">
+                  <span class="section-label">Monetization Guard</span>
+                  <h3>Non-Intrusive Midrolls</h3>
+                </div>
+              </div>
+              <ul class="clean-list" id="ads-list"></ul>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: PARALLEL TREND SCOUT -->
+      <div class="tab-panel" id="tab-trends">
+        <div class="studio-card">
+          <div class="card-head-compact">
+            <div class="card-head-title">
+              <span class="section-label">Live Parallel Search Grounding</span>
+              <h3>Listener Complaints, Saturated Clichés & Rising Tropes</h3>
+            </div>
+            <span class="badge-tag">parallel-web API</span>
+          </div>
+          
+          <div class="trend-quad-grid">
+            <div class="trend-box trend-rising">
+              <div class="trend-box-title">📈 Rising Weekly Tropes</div>
+              <ul id="tropes-rising" class="tag-list"></ul>
+            </div>
+            <div class="trend-box trend-saturated">
+              <div class="trend-box-title">🛑 Saturated Catalog Clichés</div>
+              <ul id="tropes-saturated" class="tag-list"></ul>
+            </div>
+            <div class="trend-box trend-pains">
+              <div class="trend-box-title">⚠️ Listener Dealbreakers & Pains</div>
+              <ul id="listener-pains" class="tag-list"></ul>
+            </div>
+            <div class="trend-box trend-tone">
+              <div class="trend-box-title">🎯 Studio Tone & Regional Authenticity</div>
+              <p id="trend-tone-text" class="tone-desc"></p>
+            </div>
+          </div>
+
+          <!-- Live Parallel Citations -->
+          <div class="citations-section">
+            <h4 class="sub-head">Live Web Citations (Parallel Search)</h4>
+            <div class="citations-grid" id="citations-grid"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: BOOTH & CASTING PACKET -->
+      <div class="tab-panel" id="tab-booth">
+        <div class="grid-2col">
+          <div class="studio-card">
+            <div class="card-head-compact">
+              <div class="card-head-title">
+                <span class="section-label">Production Booth</span>
+                <h3>Audio Drama Bible & Character Voices</h3>
+              </div>
+            </div>
+            <div class="bible-reader" id="bible-content"></div>
+            <div class="characters-list" id="characters-list"></div>
+          </div>
+
+          <div class="studio-card">
+            <div class="card-head-compact">
+              <div class="card-head-title">
+                <span class="section-label">Sound Design & Recording Notes</span>
+                <h3>Booth Instructions</h3>
+              </div>
+            </div>
+            <div class="booth-details" id="booth-details"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HUMAN GATE ACTION CENTER (STICKY/PROMINENT AT BOTTOM) -->
+      <section class="human-gate-dock" id="gate-dock">
+        <div class="gate-inner">
+          <div class="gate-title-col">
+            <div class="gate-badge">👑 Human Editor Gate</div>
+            <p class="gate-desc">You hold the final decision. AI cannot publish or deploy to canary without your explicit approval.</p>
+          </div>
+          
+          <div class="gate-input-col">
+            <div class="quick-notes-bar">
+              <span class="quick-note-label">Quick Notes:</span>
+              <button type="button" class="quick-note-chip" data-note="Give her a costly choice before minute 6.">"Costly choice before min 6"</button>
+              <button type="button" class="quick-note-chip" data-note="Sharpen Gujarati mother-tongue dialogue in the kitchen.">"Sharpen local dialect"</button>
+              <button type="button" class="quick-note-chip" data-note="Cut the expository monologue in the opening scene.">"Cut opening monologue"</button>
+            </div>
+            <textarea id="note" class="gate-textarea" rows="2" placeholder="Type custom direction note for rewrite (e.g. 'Make Meera confront Arjun at minute 4 before the food clip is shot')..."></textarea>
+          </div>
+
+          <div class="gate-actions-col">
+            <button data-act="direct" type="button" class="btn btn-secondary" id="btn-direct">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              Direct Rewrite
+            </button>
+            <button data-act="approve" type="button" class="btn btn-success" id="btn-approve">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+              Approve → 3% Canary
+            </button>
+            <button data-act="reject" type="button" class="btn btn-danger" id="btn-reject">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+              Archive + Rework Brief
+            </button>
+            <a href="/api/packet" target="_blank" rel="noreferrer" class="btn btn-ghost" id="btn-export-packet" title="Open 1-page text packet for Slack">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              One-Page Brief
+            </a>
+          </div>
+        </div>
+      </section>
+
     </section>
   </main>
-  <footer>
-    <p>Not a novelist. A greenlight valve. Runtime: <code>google-genai</code> + <code>google-adk</code> + <code>parallel-web</code>. Failed bets become archives, not landfill.</p>
+
+  <footer class="studio-footer">
+    <div class="container footer-inner">
+      <div class="footer-col">
+        <strong>Qissa Studio</strong> · Not a novelist bot. A structural greenlight valve for serialized audio.
+      </div>
+      <div class="footer-col footer-runtime">
+        Runtime: <code>google-genai</code> · <code>google-adk</code> · <code>parallel-web</code> · <code>FastAPI</code> · <code>Cloud Run</code>
+      </div>
+    </div>
   </footer>
+
   <script src="/static/app.js"></script>
 </body>
 </html>
