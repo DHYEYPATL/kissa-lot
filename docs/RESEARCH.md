@@ -1,44 +1,50 @@
-# Research brief used to design Kissa Lot
+# Research that actually changed the product
 
-Scope: consumer cinema + indie production pain, last six months relative to August 2026. Primary inputs were practitioner write-ups, audience surveys, and public forum patterns (Reddit / Letterboxd-class cinephile talk), not studio decks.
+Scope: last six months of listener and creator talk around serialized audio
+and consumer cinema, read against Agentic Cinema rules (deadline 9 Sep 2026
+14:00 PT, Parallel track). Surfaces: r/audiodrama, r/PocketFMReddit,
+r/audiobooks, Trustpilot / Play Store for Pocket FM, CivicScience / regional
+box-office wrap, Devpost judge interviews.
 
-## What audiences are actually buying
+## Logical fallacies we found in our own v1 — and killed
 
-- CivicScience (June 2026): ticket decision is still story, price, and names. Franchise connection and social-media buzz rank last as *stated* drivers — but younger cohorts go out to be part of a cultural conversation and will pay for something original. Horror as a favorite genre doubled since 2020 (14% overall, 19% among 18–29).
-- Reddit / r/Cinema (July 2026 pattern): younger viewers have not abandoned theaters. They have abandoned films that cannot survive as a 20-second clip. Mid-budget dramas are not hated; they are invisible.
-- Art House Convergence 2026 national survey: repertory appetite is real. Letterboxd usage jumped; Reddit rebounded as a serious-film surface.
-- Regional / non-Hollywood: India theatrical growth is regional-language led (~65% of admissions in one 2026 industry wrap). East Asian and other local-language commissions keep expanding on streamers. The desire is "see ourselves," not "see a costume."
-- Tactile backlash: analog grain, fewer camera moves, emotional clarity over VFX showboating. Short-form already spent the spectacle budget.
+1. **Canary before the human.** v1 ran a simulated canary on every open.
+   Fixed: canary is blocked until approve. Opt-in 3%. AI disclosed.
+2. **Averaging flops into the bar.** His Secret Howl (22%) made weak drafts
+   look competitive. Fixed: hit-bar only.
+3. **Twin theater.** "Gen Z likes twists" is a slogan. Fixed: minute-level
+   behaviors (skip after 90s of exposition, stay if a costly choice lands
+   before minute 8, drop on mid-sentence ads).
+4. **Magic 60%.** Banned. Graduation is beats the hit bar in this bucket.
+5. **Originality as courtroom.** We detect overlap. We do not guarantee IP.
+6. **Ads as the pitch.** Mid-roll only after a completed emotional beat.
+7. **Delete the flop.** Failed bets become archives + rework briefs, or a
+   salvaged branch that twins preferred.
+8. **Generation = product.** The product is what we refuse to publish.
 
-Implication for a development agent: do not write "make it more cinematic." Write "name the one image a stranger will clip, and keep the mother tongue in the kitchen."
+## What listeners are actually doing
 
-## What filmmakers are drowning in
+- Retention is the product, not prose. Pocket FM contest writers: punchy
+  unresolved chapter-ends outperform polished passages.
+- Coin walls after the hook. Trustpilot 2026: $40–$90 spent, scenes repeat.
+  Rhea is the persona. "Would they spend the next coin?" is first-class.
+- Payoff stall. Amelia Project thread: beloved, then months with no motion.
+  Payoff ledger exists so Season 8 cannot still be wound #1.
+- Ads eat short episodes. r/audiodrama: 16-minute listing, 5 minutes bumper.
+- Urgency then a thesis paper at the climax.
+- Generated coffee talk / AI voice drift. Priya drops at minute 3.
+- Mother tongue. Nani stays if Gujarati stays in the kitchen.
+- Discoverability gap. r/Fantasy wants serialized fantasy that is not D&D.
 
-Repeated across Storytella (May 2026), Stage 32, Stephen Follows' question corpus, and low-budget production essays:
+## What Devpost judges actually do
 
-1. Script never locks, so every downstream decision resets.
-2. Locations are verbal, not contracted.
-3. Cast is chosen before a calendar exists.
-4. Night work and company moves are treated as mood, not line items.
-5. VFX is discovered in the cut.
-6. Money is ugly and often zero even after prestige.
+They check requirements first (missing a runtime call is a Stage One fail),
+watch the video, then score 1–5 on the posted rubric. A chat window looks
+like every other team. This contest's Stage Two: implementation, design,
+impact, idea quality — equal weight.
 
-The film dies in prep, not on the sensor.
+## Design principles
 
-## How this maps onto Agentic Cinema
-
-The hackathon asks for a *functional agent* that removes enterprise friction in media workflows. The expensive friction for the actual majority of filmmakers (and for junior development execs) is not "generate another storyboard." It is:
-
-- What does a living audience want from *this* kind of story right now?
-- What will make this unshootable on the money we have?
-- What facts must not be invented?
-
-Parallel Search is the right partner tool because the answers rot. A model trained last year cannot hear this quarter's Reddit. Four targeted searches + a deterministic complexity score + Gemini as the desk writer is the workflow.
-
-## Design principles taken from the research
-
-- Contained locations beat "world-building."
-- One clip-able moment is a distribution strategy, not a gimmick.
-- Authenticity is audience-defined connection, not costume.
-- The agent should recommend cuts, not extra scenes.
-- Citations must be real URLs from Parallel, never hallucinated.
+Test structure before production cost. Humans keep the gate. Pay one secret.
+Leave one question. Mid-roll after a beat. Hit-bar, not a slogan.
+Archive + brief, not landfill. Citations are real Parallel URLs or we say offline.
