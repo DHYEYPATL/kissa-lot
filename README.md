@@ -1,109 +1,81 @@
-# Kissa Lot
+# Qissa Studio
 
-**Hackathon:** Agentic Cinema: The Blockbuster Hackathon  
-**Track:** Parallel  
-**Deadline:** 9 September 2026, 2:00 PM PT  
-**Repo:** https://github.com/DHYEYPATL/kissa-lot  
-**License:** MIT (see `LICENSE`)
+**Title line:** Qissa Studio: Human-in-the-Loop Pipeline for Retention-Optimized Serialized Stories
+**Hackathon:** Agentic Cinema: The Blockbuster Hackathon
+**Track:** Parallel
+**Repo:** https://github.com/DHYEYPATL/kissa-lot
+**License:** MIT
 
-A kissa is a story. Kissa Lot is the development desk that runs before a writer locks pages or a producer locks a schedule.
-
-Paste a logline or a screenplay. The agent does five deterministic jobs:
-
-1. Parse production format (INT/EXT, day/night, cast, locations, VFX flags).
-2. Score whether the script is shootable on an indie calendar.
-3. Call **Parallel Search API four times** for audience desire, market comps, cultural facts, and location/production reality.
-4. Ask **Gemini** (`google-genai`) to write a greenlight packet that may only cite URLs Parallel actually returned.
-5. Return shooting groups and a cut list.
-
-This is not a chatbot that "talks about film." It is a multi-step media workflow: research → risk → package.
-
-## Why this exists
-
-Last-six-month audience and practitioner research (see `docs/RESEARCH.md`):
-
-- People still leave the house for story, not franchise habit.
-- Younger crowds want original, culturally specific work they can talk about — and clip.
-- Horror is up. Mid-budget "pretty but unmemetic" drama is invisible.
-- Regional-language and tactile films are taking share from polished generic IP.
-- Indie films die in prep: unlocked scripts, verbal locations, night work treated as mood.
-
-Kissa Lot is built for that desk, not for a two-hundred-person studio lot. It also works for a development assistant drowning in spec piles.
-
-## Track compliance
-
-| Requirement | Where it lives |
-|---|---|
-| Gemini + Google Cloud AI packages | `kissa_lot/gemini_client.py` imports `google.genai`; `adk_agent/agent.py` builds an ADK `Agent` |
-| Accepted packages | `google-genai`, `google-adk`, `google-cloud-aiplatform` in `requirements.txt` |
-| Partner runtime use | `kissa_lot/tools/parallel_search.py` does `from parallel import Parallel` and `client.search(...)` |
-| Functional media workflow | Development / pre-production packaging |
-| Public repo + OSI license | This repository, MIT |
-| Hosted project | FastAPI app in `web/app.py` (Cloud Run / any container) |
-| No third-party AI models | Only Gemini + Parallel's own retrieval |
-
-IBM Bob, Grafana MCP, ClickHouse MCP, and Replit Agent are **not** used. Submit under the **Parallel** track only.
-
-## Architecture
+A qissa is a story. Qissa Studio does not replace writers. It de-risks greenlight for serialized audio.
 
 ```
-filmmaker pages
-    → parse_screenplay          (deterministic)
-    → score_complexity          (deterministic)
-    → Parallel Search × 4       (live web, cited)
-    → Gemini generate_content   (packet JSON)
-    → greenlight packet + UI
+Trends (Parallel Search) → bible + episodes (Gemini)
+→ Twin pre-score → HUMAN GATE
+→ opt-in 3% canary (only after approve; scored on the hit bar)
+→ diagnosis → 3–4 directed rewrites
+→ graduate to audio  OR  archive + rework brief
+→ same loop rescues stalled catalog titles
 ```
 
-ADK entrypoint: `adk_agent/agent.py` exposes `root_agent` with tools
-`develop_kissa`, `breakdown_pages`, and `search_production_web`.
+Generation is the easy part. The product is what we refuse to publish, and how fast the next draft gets better.
 
-## Quick start
+## Why this, not another writer bot
+
+Pocket FM-shaped desks already know acquisition is not the problem. Long-term retention is. Episodes live at 11–15 minutes. Listeners binge. They also drop when structure fails: late agency, unpaid mystery piles, mid-sentence ads, generated coffee talk, coin walls after the hook, 174 episodes of the same wound. Regional and niche shows die in committee because a flop is expensive.
+
+If we only ship "Gemini writes episode 1," we lose this hackathon. The loop is the invention.
+
+## Honest about twins and canary
+
+- Twins are seven persona cards with concrete behaviors. Not a trained causal model of a platform.
+- Canary is simulated, opt-in 3%, **blocked until a human approves**. We do not pretend we dumped experiments on a live base.
+- Graduation is catalog-relative against *hit* titles in the same bucket. No magic 60%. Flops do not lower the bar.
+- Originality is overlap + a planted clone (`His Secret Howl`) + Parallel near-duplicate search. Not a courtroom engine.
+- Monetization tags sit after an emotional beat. They are not the pitch.
+
+## Stack (rules-legal)
+
+Official rules ban OpenAI, Anthropic, and other agent frameworks. LangGraph / CrewAI / GPT are not used.
+
+| Job | Tool | File |
+|---|---|---|
+| Trend Scout + near-dupe sweep | Parallel Search API (`parallel-web`) | `qissa/search.py` |
+| Showrunner / writer / rewrite | Gemini via `google-genai` | `qissa/llm.py` |
+| Multi-agent surface | Google ADK `root_agent` | `adk_agent/agent.py` |
+| Graph + state | Python `SeriesState` | `qissa/state.py` |
+| Hosting | FastAPI + Cloud Run | `web/app.py`, `Dockerfile` |
+
+## Agents we actually built
+
+Trend Scout · Showrunner · Episode Writer · Canon Guard · Twin Bench · Retention Critic · Originality Guard · Human Gate · Payoff Ledger · Catalog Rescue
+
+Stubbed on purpose: merch marketplace, live user canary, Databricks, full TTS mix, multi-language adapter.
+
+Interactive PS: episode 2 has two pre-written branches (`keep` vs `tell`), scored against the same twins.
+
+## Run
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
 pip install -r requirements.txt
-
 cp .env.example .env
-# GEMINI_API_KEY from https://aistudio.google.com/app/apikey
-# PARALLEL_API_KEY from https://platform.parallel.ai  (hackathon signup grants credits)
-
-python -m kissa_lot examples/night_kitchen.fountain --json
-python -m unittest discover -s tests
-uvicorn web.app:app --reload --port 8080
+python -m qissa eval
+python -m qissa
+uvicorn web.app:app --port 8080
 ```
 
-Open `http://127.0.0.1:8080`.
+ADK: `adk web` (entrypoint `adk_agent/agent.py`).
 
-### ADK
+Tests: `python -m unittest tests.test_qissa tests.test_parser -v`
 
-```bash
-adk web
-# or
-adk run adk_agent
-```
+## Rubric map
 
-### Cloud Run
+- Technological implementation: Parallel in `qissa/search.py`. Gemini in `qissa/llm.py`. ADK tools wrap the same graph. `/health` prints the eval harness.
+- Design: studio floor — trend, ledger, twins with coin-willingness, heatmap, diagnosis, before/after, human box, branches.
+- Impact: greenlight and salvage for Pocket-FM-shaped desks. Failed series become briefs.
+- Idea quality: test structure before production cost. Partner used as live trend grounding *and* near-duplicate search.
 
-```bash
-gcloud run deploy kissa-lot \
-  --source . \
-  --region us-central1 \
-  --allow-unauthenticated \
-  --set-env-vars GEMINI_API_KEY=...,PARALLEL_API_KEY=...
-```
+## Demo
 
-Prefer Secret Manager in a real submission rather than raw flags.
+`docs/DEMO_SCRIPT.md`. Show the gate. Show a structural diagnosis. Show archive-instead-of-delete. Click a Parallel URL.
 
-## Demo without keys
-
-The parser and complexity engine always run. If a key is missing, the orchestrator records the exception, fills a research fixture taken from the design brief, and still returns a packet so you can walk the UI. Judges should see live Parallel + Gemini in the demo video — set the keys first.
-
-## What to submit on Devpost
-
-Copy `docs/SUBMISSION.md`. Record the trailer with `docs/DEMO_SCRIPT.md` (under three minutes, English, project running — not a cinematic teaser).
-
-## Credits
-
-Built by Dhyey Patel for Agentic Cinema. Research notes in `docs/RESEARCH.md`. Sample pages in `examples/night_kitchen.fountain` are original.
+GCP credit form closes 31 Aug 2026 23:59 PST. Parallel keys: https://platform.parallel.ai

@@ -1,42 +1,44 @@
-# Devpost submission draft — Kissa Lot
+# Devpost form — paste this
 
-**Project name:** Kissa Lot  
-**Tagline:** The development desk that listens to the crowd before you lock the script.  
-**Track:** Parallel  
-**Built with:** Google Gemini (`google-genai`), Google ADK, Parallel Search API (`parallel-web`), FastAPI, Cloud Run  
-**Repo:** https://github.com/DHYEYPATL/kissa-lot  
-**License:** MIT  
+**Name:** Qissa Studio
 
-## Elevator
+**Tagline:** Human-in-the-loop pipeline for retention-optimized serialized stories
 
-Kissa Lot is a production-ready agent for filmmakers and development execs. It turns a logline or screenplay into a cited greenlight packet: who the 2026 audience is, whether the pages are shootable, what to cut, and which live sources say so.
+**Track:** Parallel
 
-## The problem
+**Repo:** https://github.com/DHYEYPATL/kissa-lot
 
-Most films die before day one. Scripts do not lock. Locations are a handshake. Night work is treated as atmosphere. Meanwhile audiences — Reddit threads, CivicScience, regional box office — are loud about what they will leave the house for: story, cultural specificity, one image they can clip. Development still guesses.
+**License:** MIT (file at repo root)
 
-## What it does
+**Hosted project URL:** *(paste Cloud Run URL after `gcloud run deploy`)*
 
-1. Parses production format without a model.
-2. Scores schedule risk (locations, nights, VFX, cast).
-3. Runs four Parallel Search calls: audience desire, market comps, authenticity, production facts.
-4. Gemini writes the packet and may only cite URLs Parallel returned.
-5. Shows shooting groups and a cut list in a desk UI.
+**Demo video URL:** *(YouTube/Vimeo, ≤3 min, English, app on camera — follow docs/DEMO_SCRIPT.md)*
 
-## How it uses the required stack
+## Built with
 
-- **Gemini / ADK:** `adk_agent/agent.py` defines `root_agent` with function tools. `kissa_lot/gemini_client.py` calls `google.genai` `client.models.generate_content`.
-- **Parallel:** `kissa_lot/tools/parallel_search.py` constructs `Parallel(api_key=...)` and calls `client.search(objective=..., search_queries=..., mode=...)`.
-- No OpenAI, Anthropic, or other agent frameworks.
+google-genai, google-adk, google-cloud-aiplatform, parallel-web, FastAPI, Cloud Run, Pydantic
 
-## Data sources
+## Description
 
-Live web via Parallel. Design research (last six months) documented in `docs/RESEARCH.md`. Sample screenplay is original.
+Qissa Studio is a greenlight valve for serialized audio, the Pocket-FM-shaped desk where a flop is weeks of bible work and most drop-off is structural.
 
-## Learnings
+Parallel Search grounds a trend brief (rising vs saturated tropes, regional moments, listener pains) and a near-duplicate sweep. Gemini drafts the bible, characters, episode 1, and the keep/tell branches. Seven digital-twin personas pre-score the draft against minute-level behaviors — skip after 90 seconds of exposition, stay if a costly choice lands before minute 8, refuse a coin if the last 170 episodes never paid a wound. A human must approve, reject, or direct in natural language. Only approve starts a simulated 3% opt-in canary, scored against the *hit* bar in the same genre bucket. Failures leave an archive and a rework brief. Generation is the easy part. The product is what we refuse to publish.
 
-Retrieval has to be split by job. One "research this movie" query produces mush. Four narrow objectives — crowd, market, fact, lot — give Gemini something it cannot hallucinate past. The complexity score should stay deterministic so a missing API key cannot invent a green light.
+Not used (rules-banned): OpenAI, Anthropic, LangGraph, CrewAI, any non-Google model.
 
-## Next
+Runtime proof:
 
-Vertex Agent Engine deploy, Parallel Extract on the top three URLs, and a rights/clearance pass for any real names the search surfaces.
+- `qissa/search.py` calls `parallel.Parallel(...).search(...)`
+- `qissa/llm.py` calls `google.genai.Client`
+- `adk_agent/agent.py` exposes `root_agent` with those tools
+
+## What we learned
+
+One research query is mush; four jobs are a brief. Averaging flops into a "catalog bar" makes weak drafts look fine — we switched to a hit-bar. Twins without minute-level behaviors smell like theater. Canary before a human is a political error. Never mid-sentence ads. Never a magic 60%.
+
+## How it maps to judging
+
+- Implementation: required packages imported and called; eval harness catches a planted clone and a bad-pacing script offline.
+- Design: studio floor UI — trend, ledger, twins, heatmap, diagnosis, before/after, human box — not a chat window.
+- Impact: named buyer (serialized-audio editor), named cost (weeks before you know if anyone stays), salvage path for stalled catalog titles.
+- Idea: Parallel is the living ear of the week, not a citation sticker.

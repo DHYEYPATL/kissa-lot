@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "kissa-lot"
-version = "1.0.0"
-description = "Audience-grounded cinematic development agent for Agentic Cinema (Parallel track)."
+version = "2.1.0"
+description = "Qissa Studio: human-in-the-loop greenlight loop for serialized audio (Agentic Cinema, Parallel track)."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
@@ -13,16 +13,19 @@ authors = [{ name = "Dhyey Patel" }]
 dependencies = [
   "google-genai>=1.20.0",
   "google-adk>=1.8.0",
+  "google-cloud-aiplatform[agent_engines,adk]>=1.101.0",
   "parallel-web>=1.0.1",
   "fastapi>=0.115.0",
   "uvicorn[standard]>=0.32.0",
   "pydantic>=2.8.0",
   "python-dotenv>=1.0.1",
   "httpx>=0.27.0",
+  "python-multipart>=0.0.12",
 ]
 
 [project.scripts]
+qissa = "qissa.__main__:main"
 kissa-lot = "kissa_lot.__main__:main"
 
 [tool.setuptools.packages.find]
-include = ["kissa_lot*", "adk_agent*"]
+include = ["qissa*", "kissa_lot*", "adk_agent*", "web*"]
