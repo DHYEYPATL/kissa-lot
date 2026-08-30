@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kissa-lot"
+version = "1.0.0"
+description = "Audience-grounded cinematic development agent for Agentic Cinema (Parallel track)."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Dhyey Patel" }]
+dependencies = [
+  "google-genai>=1.20.0",
+  "google-adk>=1.8.0",
+  "parallel-web>=1.0.1",
+  "fastapi>=0.115.0",
+  "uvicorn[standard]>=0.32.0",
+  "pydantic>=2.8.0",
+  "python-dotenv>=1.0.1",
+  "httpx>=0.27.0",
+]
+
+[project.scripts]
+kissa-lot = "kissa_lot.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["kissa_lot*", "adk_agent*"]
