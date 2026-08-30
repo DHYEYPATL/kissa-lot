@@ -15,20 +15,28 @@ def model_name() -> str:
     return os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
 
 
+_CLIENT = None
+
+
 def client():
+    global _CLIENT
     if genai is None:
         raise RuntimeError("google-genai is not installed")
+    if _CLIENT is not None:
+        return _CLIENT
 
     if os.environ.get("GOOGLE_GENAI_USE_VERTEXAI", "").lower() == "true":
-        return genai.Client(
+        _CLIENT = genai.Client(
             vertexai=True,
             project=os.environ.get("GOOGLE_CLOUD_PROJECT"),
             location=os.environ.get("GOOGLE_CLOUD_LOCATION", "us-central1"),
         )
-    key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
-    if not key:
-        raise RuntimeError("GEMINI_API_KEY missing")
-    return genai.Client(api_key=key)
+    else:
+        key = (os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY") or "").strip()
+        if not key:
+            raise RuntimeError("GEMINI_API_KEY missing")
+        _CLIENT = genai.Client(api_key=key)
+    return _CLIENT
 
 
 def generate_json(prompt: str) -> dict[str, Any]:
