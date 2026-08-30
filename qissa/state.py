@@ -165,4 +165,9 @@ class SeriesState(BaseModel):
     verdict: str = ""
     rework_brief: str = ""
     rescue_of: str = ""
+    owned_fact: str = ""
+    refused_instinct: str = ""
+    slop_flags: list[str] = Field(default_factory=list)
+    booth: dict[str, Any] = Field(default_factory=dict)
+    provenance: dict[str, str] = Field(default_factory=dict)
     extras: dict[str, Any] = Field(default_factory=dict)
