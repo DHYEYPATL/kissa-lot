@@ -41,11 +41,11 @@ function paint(s) {
     ...(s.memory?.open_threads || []).map((x) => `<li>open: ${x}</li>`),
   ].join("");
   document.getElementById("twins").innerHTML = (s.twin_scores || []).map((p) =>
-    `<div class="chip">${p.persona_name.split(",")[0]} · ${p.score} · drop ${p.drop_minute}m · coin ${p.would_spend_coin ? "yes" : "no"}</div>`
+    `<div class="chip">${p.persona_name.split(",")[0]} · ${p.score} · drop ${p.drop_minute}m · next ${p.would_start_next ? "yes" : "no"}</div>`
   ).join("");
   const c = s.canary || {};
   document.getElementById("canary").textContent = c.ran
-    ? `RAN 3% opt-in · completion ${c.completion} · next ${c.next_start} · coin ${c.coin_conversion} · ${c.vs_catalog} · ${c.session_fit}`
+    ? `RAN 3% opt-in · completion ${c.completion} · next ${c.next_start} · ${c.vs_catalog} · ${c.session_fit}`
     : (c.blocked_reason || "Canary waiting on human.");
   document.getElementById("heat").innerHTML = (c.drop_timestamps || []).map((m) =>
     `<div class="chip">drop ${m}m</div>`
@@ -70,4 +70,18 @@ function paint(s) {
   document.getElementById("cites").innerHTML = (t.citations || []).map((h) =>
     `<li><a href="${h.url}" target="_blank" rel="noreferrer">${h.title}</a></li>`
   ).join("") || "<li>Offline fallback — add PARALLEL_API_KEY for live URLs.</li>";
+  const instinctEl = document.getElementById("instinct");
+  if (instinctEl) instinctEl.textContent = s.refused_instinct
+    ? `We will not write: ${s.refused_instinct}` : "";
+  const ownedEl = document.getElementById("owned");
+  if (ownedEl) ownedEl.textContent = s.owned_fact
+    ? `Owned fact on-mic: ${s.owned_fact}` : "No owned fact — draft will lean average.";
+  const slopEl = document.getElementById("slop");
+  if (slopEl) slopEl.innerHTML = (s.slop_flags || []).map((x) => `<li>${x}</li>`).join("") || "<li>Clean.</li>";
+  const boothEl = document.getElementById("booth");
+  if (boothEl) boothEl.textContent = JSON.stringify(s.booth || {}, null, 2);
+  const provEl = document.getElementById("prov");
+  if (provEl) provEl.innerHTML = Object.entries(s.provenance || {}).map(([k, v]) =>
+    `<li>${k}: ${v}</li>`
+  ).join("");
 }

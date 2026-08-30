@@ -15,7 +15,7 @@
       <p class="eyebrow">Agentic Cinema · Parallel track · Gemini + ADK</p>
       <h1>Qissa Studio</h1>
     </div></div>
-    <p class="lede">A greenlight valve for serialized audio. Parallel grounds the week. Gemini drafts the bible. Twins pre-score structure. Humans keep the gate. Canary is opt-in 3% and never runs first.</p>
+    <p class="lede">You have a story idea for earphones. Before you hire actors, this desk tells you: keep going, fix this beat, or stop. You still decide. It does not publish anything by itself.</p>
   </header>
   <main>
     <section class="slate">
@@ -28,11 +28,14 @@
           </select>
         </label>
         <label class="field"><span>Seed or stalled catalog title</span>
-          <textarea name="seed" rows="5">A night-shift cook in Surat keeps her late mother's recipe book taped under a prep table. A food-show producer wants the pour as a clip.</textarea>
+          <textarea name="seed" rows="4">A night-shift cook in Surat keeps her late mother's recipe book taped under a prep table. A food-show producer wants the pour as a clip.</textarea>
+        </label>
+        <label class="field"><span>Owned fact (required for uniqueness — a wage, a street, a smell only you know)</span>
+          <textarea name="owned_fact" rows="2">The tape under the table still smells like asafetida from last Undhiyu season.</textarea>
         </label>
         <div class="actions">
-          <button type="submit" id="run">Open the lot</button>
-          <p class="hint">Paste "Night Shift Surat" or "Files Without Faces" to run catalog rescue.</p>
+          <button type="submit" id="run">Test this idea</button>
+          <p class="hint">One idea + one fact only you know. Then we say go, fix, or stop.</p>
         </div>
       </form>
       <ol class="ticker" id="ticker" hidden></ol>
@@ -52,7 +55,7 @@
       </div>
       <article><h2>Bible + series memory</h2><p id="bible"></p></article>
       <article>
-        <h2>Twin bench — would they spend the next coin?</h2>
+        <h2>Twin bench — would they start the next episode?</h2>
         <div id="twins" class="groups"></div>
       </article>
       <article>
@@ -77,12 +80,29 @@
           <button data-act="direct" type="button">Direct rewrite</button>
           <button data-act="approve" type="button">Approve → 3% canary</button>
           <button data-act="reject" type="button">Archive + brief</button>
+          <a href="/api/packet" target="_blank" rel="noreferrer">Download one-page brief</a>
         </div>
       </article>
       <div class="grid">
         <article><h2>Originality (similarity, not a lawsuit)</h2><ul id="orig"></ul></article>
         <article><h2>Ad-safe tags — after the beat, never mid-sentence</h2><ul id="ads"></ul></article>
       </div>
+      <div class="grid">
+        <article>
+          <h2>Refused first instinct</h2>
+          <p id="instinct"></p>
+          <p id="owned"></p>
+        </article>
+        <article>
+          <h2>Slop scan</h2>
+          <ul id="slop"></ul>
+        </article>
+      </div>
+      <article>
+        <h2>Booth packet — audio only, no picture</h2>
+        <pre id="booth"></pre>
+      </article>
+      <article><h2>Provenance</h2><ul id="prov"></ul></article>
       <article><h2>Parallel citations</h2><ul id="cites" class="cites"></ul></article>
     </section>
   </main>

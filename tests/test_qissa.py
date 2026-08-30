@@ -52,6 +52,13 @@ class QissaTests(unittest.TestCase):
         self.assertTrue(state.before_after)
         self.assertEqual(state.cycle, 1)
 
+    def test_owned_fact_and_booth(self):
+        state = run_desk("A Surat cook hides a notebook.", owned_fact="asafetida on the tape")
+        self.assertEqual(state.owned_fact, "asafetida on the tape")
+        self.assertTrue(state.refused_instinct)
+        self.assertTrue(state.booth.get("audio_only"))
+        self.assertIn("none", state.provenance.get("picture_track", ""))
+
 
 if __name__ == "__main__":
     unittest.main()
