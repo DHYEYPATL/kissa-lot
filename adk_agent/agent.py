@@ -11,10 +11,11 @@ from qissa.state import SeriesState
 SESSIONS: dict[str, SeriesState] = {}
 
 
-def open_qissa(seed: str, genre: str = "regional family drama") -> dict:
+def open_qissa(seed: str, genre: str = "regional family drama", owned_fact: str = "") -> dict:
     """Run Trend Scout → Showrunner → Twin Bench → Critic → Originality.
-    Stops at the human gate. Does not publish. Does not canary."""
-    state = run_desk(seed, genre=genre)
+    Stops at the human gate. Does not publish. Does not canary.
+    owned_fact is a lived detail the model must not invent."""
+    state = run_desk(seed, genre=genre, owned_fact=owned_fact)
     SESSIONS["current"] = state
     return state.model_dump()
 
@@ -53,8 +54,8 @@ try:
         description="Human-in-the-loop greenlight loop for serialized audio.",
         instruction=(
             "You are Qissa Studio. A qissa is a story. You do not replace writers. "
-            "Call open_qissa on a seed. Then wait. Call human_decide only when the "
-            "user accepts, rejects, or gives a note. Approve is what starts canary. "
+            "Call open_qissa on a seed and an owned_fact. Then wait. Call human_decide "
+            "only when the user accepts, rejects, or gives a note. Approve starts canary. "
             "Never invent Parallel URLs. If asked to prove the desk works, call eval_desk."
         ),
         tools=[open_qissa, human_decide, search_live_web, catalog_bars, eval_desk],

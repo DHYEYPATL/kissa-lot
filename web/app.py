@@ -5,7 +5,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, Form
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 
 from qissa.catalog import CATALOG, bucket_bar, stalled_shows
@@ -59,8 +59,9 @@ def open_lot(
     seed: str = Form(...),
     genre: str = Form("regional family drama"),
     title: str = Form(""),
+    owned_fact: str = Form(""),
 ) -> JSONResponse:
-    state = run_desk(seed, genre=genre, title=title)
+    state = run_desk(seed, genre=genre, title=title, owned_fact=owned_fact)
     SESSIONS["current"] = state
     return JSONResponse(state.model_dump())
 
@@ -73,3 +74,32 @@ def gate(action: str = Form(...), note: str = Form("")) -> JSONResponse:
     state = human_gate(state, action, note)
     SESSIONS["current"] = state
     return JSONResponse(state.model_dump())
+
+
+@app.get("/api/packet")
+def packet() -> PlainTextResponse:
+    """One-page GO / NO-GO a producer can paste into Slack."""
+    state = SESSIONS.get("current")
+    if state is None:
+        return PlainTextResponse("No series on the lot.", status_code=400)
+    lines = [
+        f"QISSA STUDIO — {state.title}",
+        f"STATUS: {state.status}",
+        f"VERDICT: {state.verdict or 'HOLD FOR HUMAN'}",
+        f"OWNED FACT: {state.owned_fact or '(none)'}",
+        f"REFUSED: {state.refused_instinct}",
+        "",
+        "WHY PEOPLE MIGHT DROP",
+    ]
+    for d in state.diagnoses[:5]:
+        lines.append(f"- {d.issue}: {d.edit_op}")
+    lines += ["", "CAST (voices must differ)"]
+    for v in (state.booth or {}).get("voices") or []:
+        lines.append(f"- {v.get('name')}: {v.get('tag')}")
+    lines += ["", "WEB SOURCES (Parallel — do not invent)"]
+    for c in (state.trend.citations or [])[:6]:
+        lines.append(f"- {c.get('title')} {c.get('url')}")
+    if not state.trend.citations:
+        lines.append("- none this run (offline fallback)")
+    lines += ["", "AUDIO ONLY. No picture track."]
+    return PlainTextResponse("\n".join(lines))
