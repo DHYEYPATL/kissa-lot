@@ -16,14 +16,15 @@ from qissa.agents import (
 )
 from qissa.catalog import find_title
 from qissa.state import HumanDecision, SeriesState
+from qissa.uniqueness import booth_packet, provenance, refused_instinct, scan_slop
 
 
-def run_desk(seed: str, genre: str = "regional family drama", title: str = "") -> SeriesState:
-    """Trend → bible → critic → twins → originality → HUMAN GATE.
-
-    Canary does *not* run here. That was a v1 fallacy. Real users (even 3%)
-    wait for a human. Rescue mode fires if the seed matches a stalled title.
-    """
+def run_desk(
+    seed: str,
+    genre: str = "regional family drama",
+    title: str = "",
+    owned_fact: str = "",
+) -> SeriesState:
     rescued = find_title(seed) or find_title(title)
     state = SeriesState(
         title=title or (rescued["title"] if rescued else "Untitled Qissa"),
@@ -31,8 +32,11 @@ def run_desk(seed: str, genre: str = "regional family drama", title: str = "") -
         seed=seed,
         logline=seed,
         rescue_of=rescued["id"] if rescued else "",
+        owned_fact=owned_fact.strip(),
     )
     state.steps.append("open_lot")
+    if state.owned_fact:
+        state.steps.append("owned_fact_locked")
     if rescued:
         state.steps.append(f"catalog_rescue:{rescued['id']}")
 
@@ -67,6 +71,22 @@ def run_desk(seed: str, genre: str = "regional family drama", title: str = "") -
 
     state.monetization = monetize(state)
     state.steps.append("ad_safe_tags")
+
+    script = state.episodes[0].script if state.episodes else ""
+    state.refused_instinct = refused_instinct(state.genre)
+    state.slop_flags = scan_slop(" ".join([state.bible, script, state.logline]))
+    state.booth = booth_packet(
+        state.title,
+        state.characters,
+        script,
+        state.episodes[0].minutes if state.episodes else 12,
+    )
+    state.provenance = provenance(
+        "parallel" in (state.engines.get("parallel") or ""),
+        "google-genai" in (state.engines.get("gemini") or ""),
+        state.owned_fact,
+    )
+    state.steps.append("uniqueness+booth_packet")
 
     state.canary = simulate_canary(state)
     state.status = "review"
