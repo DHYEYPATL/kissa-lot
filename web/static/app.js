@@ -66,6 +66,8 @@ document.querySelectorAll(".desk-tab").forEach((tab) => {
   });
 });
 
+let currentSessionId = "";
+
 // 4. SUBMIT STORY FORM
 openForm.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -79,11 +81,16 @@ openForm.addEventListener("submit", async (e) => {
   `;
 
   try {
-    const res = await fetch("/api/open", { method: "POST", body: new FormData(openForm) });
+    const formData = new FormData(openForm);
+    if (currentSessionId) formData.set("session_id", currentSessionId);
+    const res = await fetch("/api/open", { method: "POST", body: formData });
     const data = await res.json();
+    if (data.session_id) currentSessionId = data.session_id;
     paint(data);
     updateStepper(2);
-    // Smooth scroll to board
+    // Update packet download URL with session_id
+    const exportBtn = document.getElementById("btn-export-packet");
+    if (exportBtn) exportBtn.href = `/api/packet?session_id=${encodeURIComponent(currentSessionId)}`;
     board.scrollIntoView({ behavior: "smooth", block: "start" });
   } catch (err) {
     ticker.innerHTML += `<li style="color:var(--terracotta);">Error running desk: ${err.message}</li>`;
@@ -103,8 +110,10 @@ document.querySelectorAll("[data-act]").forEach((btn) => {
       const data = new FormData();
       data.set("action", action);
       data.set("note", note);
+      if (currentSessionId) data.set("session_id", currentSessionId);
       const res = await fetch("/api/gate", { method: "POST", body: data });
       const state = await res.json();
+      if (state.session_id) currentSessionId = state.session_id;
       paint(state);
       if (action === "approve") {
         updateStepper(3);

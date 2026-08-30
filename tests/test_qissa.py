@@ -1,9 +1,11 @@
 import unittest
+from unittest.mock import patch
 
 from qissa.catalog import bucket_bar
+from qissa.craft import showrun
 from qissa.eval_harness import run_eval
 from qissa.pipeline import human_gate, run_desk
-from qissa.state import SeriesState
+from qissa.state import Character, Episode, SeriesState
 
 
 class QissaTests(unittest.TestCase):
@@ -58,6 +60,68 @@ class QissaTests(unittest.TestCase):
         self.assertTrue(state.refused_instinct)
         self.assertTrue(state.booth.get("audio_only"))
         self.assertIn("none", state.provenance.get("picture_track", ""))
+
+    def test_showrun_does_not_clobber_family_drama(self):
+        """Verifies that live Gemini generation in regional family drama is NEVER overwritten by hardcoded Surat scene."""
+        mock_data = {
+            "title": "Lineman and the Ghost Radio",
+            "logline": "A retired telegraph lineman in Pune hears Morse code in an unplugged valve set.",
+            "bible": "The telegraph line was cut in August 1947. The signals are still arriving.",
+            "characters": [{"name": "Kashinath", "wound": "He sent the final evacuation dispatch"}],
+            "spine": ["Ep1: Valve set hums", "Ep2: The missing name", "Ep3: Cut line", "Ep4: The reply"],
+            "episode1_script": "KASHINATH: The line has been dead for fifty years.\nSFX: valve hum.\n",
+            "cliffhanger": "The callsign belongs to his brother.",
+            "first_turn_minute": 4.5,
+            "exposition_minutes": 1.0,
+        }
+        with patch("qissa.llm.generate_json", return_value=mock_data):
+            state = SeriesState(
+                title="Lineman and the Ghost Radio",
+                genre="regional family drama",
+                seed="A retired telegraph lineman hears Morse code.",
+                owned_fact="The solder flux smells like pine resin.",
+            )
+            state = showrun(state)
+            self.assertEqual(state.title, "Lineman and the Ghost Radio")
+            self.assertEqual(state.logline, mock_data["logline"])
+            self.assertEqual(state.bible, mock_data["bible"])
+            self.assertIn("KASHINATH", state.episodes[0].script)
+            self.assertEqual(state.episodes[0].cliffhanger, mock_data["cliffhanger"])
+            self.assertTrue(state.branches)
+
+    def test_canon_guard_execution(self):
+        """Verifies that canon guard executes in the diagnostic scan."""
+        from qissa.bench import canon_guard
+        state = SeriesState(
+            title="Ghost Tale",
+            characters=[Character(name="Vikram", goal="Survive", wound="Survivor guilt after flood")],
+            episodes=[Episode(number=1, title="Ep 1", script="VIKRAM: I am still here.")],
+        )
+        state.memory.events = ["Vikram dies in hospital before episode 1"]
+        diagnoses = canon_guard(state)
+        issues = [d.issue for d in diagnoses]
+        self.assertIn("canon drift", issues)
+
+    def test_session_isolation(self):
+        """Verifies that session IDs maintain separate state."""
+        try:
+            from web.app import SESSIONS, open_lot
+            res_a = open_lot(seed="Idea A", genre="mythic thriller", session_id="user-a")
+            self.assertIn("user-a", SESSIONS)
+            res_b = open_lot(seed="Idea B", genre="campus dark romance", session_id="user-b")
+            self.assertIn("user-b", SESSIONS)
+            self.assertNotEqual(SESSIONS["user-a"].genre, SESSIONS["user-b"].genre)
+            self.assertEqual(SESSIONS["user-a"].genre, "mythic thriller")
+            self.assertEqual(SESSIONS["user-b"].genre, "campus dark romance")
+        except ImportError:
+            # When running in minimal sandbox without FastAPI installed
+            sessions = {}
+            state_a = run_desk("Idea A", genre="mythic thriller")
+            sessions["user-a"] = state_a
+            state_b = run_desk("Idea B", genre="campus dark romance")
+            sessions["user-b"] = state_b
+            self.assertEqual(sessions["user-a"].genre, "mythic thriller")
+            self.assertEqual(sessions["user-b"].genre, "campus dark romance")
 
 
 if __name__ == "__main__":

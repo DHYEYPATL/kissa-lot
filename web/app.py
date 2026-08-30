@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import os
+import uuid
 from pathlib import Path
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, Form
+from fastapi import FastAPI, Form, Query
 from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -18,7 +19,7 @@ load_dotenv()
 ROOT = Path(__file__).resolve().parent
 SESSIONS: dict[str, SeriesState] = {}
 
-app = FastAPI(title="Qissa Studio", version="2.1.0")
+app = FastAPI(title="Qissa Studio", version="2.2.0")
 app.mount("/static", StaticFiles(directory=str(ROOT / "static")), name="static")
 
 
@@ -49,9 +50,11 @@ def index() -> str:
 
 @app.get("/api/catalog")
 def catalog() -> dict:
-    return {"catalog": CATALOG, "bars": {
-        g: bucket_bar(g) for g in sorted({r["genre"] for r in CATALOG})
-    }, "stalled": stalled_shows()}
+    return {
+        "catalog": CATALOG,
+        "bars": {g: bucket_bar(g) for g in sorted({r["genre"] for r in CATALOG})},
+        "stalled": stalled_shows(),
+    }
 
 
 @app.post("/api/open")
@@ -60,28 +63,51 @@ def open_lot(
     genre: str = Form("regional family drama"),
     title: str = Form(""),
     owned_fact: str = Form(""),
+    session_id: str = Form(""),
 ) -> JSONResponse:
+    sid = session_id.strip() or uuid.uuid4().hex
     state = run_desk(seed, genre=genre, title=title, owned_fact=owned_fact)
-    SESSIONS["current"] = state
-    return JSONResponse(state.model_dump())
+    SESSIONS[sid] = state
+    SESSIONS["current"] = state  # Fallback for single-client tooling
+    
+    data = state.model_dump()
+    data["session_id"] = sid
+    return JSONResponse(data)
 
 
 @app.post("/api/gate")
-def gate(action: str = Form(...), note: str = Form("")) -> JSONResponse:
-    state = SESSIONS.get("current")
+def gate(
+    action: str = Form(...),
+    note: str = Form(""),
+    session_id: str = Form(""),
+) -> JSONResponse:
+    sid = session_id.strip()
+    state = SESSIONS.get(sid) if sid else None
     if state is None:
-        return JSONResponse({"error": "no series on the lot"}, status_code=400)
+        state = SESSIONS.get("current")
+    if state is None:
+        return JSONResponse({"error": "No series active on this lot session."}, status_code=400)
+    
     state = human_gate(state, action, note)
+    if sid:
+        SESSIONS[sid] = state
     SESSIONS["current"] = state
-    return JSONResponse(state.model_dump())
+    
+    data = state.model_dump()
+    data["session_id"] = sid or "current"
+    return JSONResponse(data)
 
 
 @app.get("/api/packet")
-def packet() -> PlainTextResponse:
+def packet(session_id: str = Query("")) -> PlainTextResponse:
     """One-page GO / NO-GO a producer can paste into Slack."""
-    state = SESSIONS.get("current")
+    sid = session_id.strip()
+    state = SESSIONS.get(sid) if sid else None
     if state is None:
-        return PlainTextResponse("No series on the lot.", status_code=400)
+        state = SESSIONS.get("current")
+    if state is None:
+        return PlainTextResponse("No series active on the lot.", status_code=400)
+    
     lines = [
         f"QISSA STUDIO — {state.title}",
         f"STATUS: {state.status}",

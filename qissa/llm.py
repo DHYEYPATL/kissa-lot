@@ -40,7 +40,13 @@ def client():
 
 
 def generate_json(prompt: str) -> dict[str, Any]:
-    response = client().models.generate_content(model=model_name(), contents=prompt)
+    c = client()
+    try:
+        from google.genai import types
+        config = types.GenerateContentConfig(response_mime_type="application/json")
+        response = c.models.generate_content(model=model_name(), contents=prompt, config=config)
+    except Exception:
+        response = c.models.generate_content(model=model_name(), contents=prompt)
     text = (getattr(response, "text", None) or "").strip()
     return extract_json(text)
 
