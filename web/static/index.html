@@ -11,8 +11,9 @@
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
 <body>
-  <!-- Ambient Audio Studio Texture -->
+  <!-- Ambient Audio Studio Texture & Scan Lines -->
   <div class="studio-grain"></div>
+  <div class="futuristic-scanline"></div>
 
   <header class="studio-header">
     <div class="container header-inner">
@@ -34,6 +35,14 @@
       </div>
       
       <div class="header-actions">
+        <!-- Live Audio VU Visualizer Meters -->
+        <div class="mini-vu-meter" title="Audio Spectrum">
+          <span class="vu-bar bar-1"></span>
+          <span class="vu-bar bar-2"></span>
+          <span class="vu-bar bar-3"></span>
+          <span class="vu-bar bar-4"></span>
+          <span class="vu-bar bar-5"></span>
+        </div>
         <a href="#pitch-desk" class="btn btn-secondary btn-sm" id="btn-new-lot">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
           New Story Lot
@@ -70,7 +79,7 @@
         <span class="step-num">03</span>
         <span class="step-info">
           <strong>Editor Gate & Canary</strong>
-          <small>Rewrite, 3% canary, or brief</small>
+          <small>Voice note, 3% canary, or brief</small>
         </span>
       </div>
     </nav>
@@ -344,7 +353,7 @@
                 </div>
               </div>
               <div class="ba-diff-box" id="ba-diff">
-                <p class="empty-state">Use the Human Gate below to direct a rewrite (e.g. <em>"Make Meera confront the producer at minute 4"</em>) to see the live patch.</p>
+                <p class="empty-state">Use the Human Gate below or click <strong>🎙️ Speak Note</strong> to direct a rewrite (e.g. <em>"Make Meera confront the producer at minute 4"</em>) to see the live patch.</p>
               </div>
             </div>
 
@@ -413,7 +422,7 @@
         </div>
       </div>
 
-      <!-- TAB 4: BOOTH & CASTING PACKET -->
+      <!-- TAB 4: BOOTH & CASTING PACKET + INTERACTIVE VOICE ORB -->
       <div class="tab-panel" id="tab-booth">
         <div class="grid-2col">
           <div class="studio-card">
@@ -430,21 +439,49 @@
           <div class="studio-card">
             <div class="card-head-compact">
               <div class="card-head-title">
-                <span class="section-label">Sound Design & Recording Notes</span>
-                <h3>Booth Instructions</h3>
+                <span class="section-label">Interactive Voice Visualizer</span>
+                <h3>Live Audio Studio Orb</h3>
+              </div>
+              <span class="badge-tag" id="orb-status-tag">WebGL Realtime</span>
+            </div>
+            
+            <!-- Interactive WebGL Voice Orb Display -->
+            <div class="voice-orb-wrapper">
+              <canvas id="booth-voice-orb" class="voice-orb-canvas" width="300" height="300"></canvas>
+              <div class="orb-controls-overlay">
+                <button type="button" id="btn-booth-mic" class="btn btn-primary btn-sm">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                  <span id="booth-mic-label">Test Mic Voice Pulse</span>
+                </button>
+                <div class="orb-param-bar">
+                  <label class="orb-param">
+                    <span>Hue:</span>
+                    <input type="range" id="orb-hue" min="0" max="360" value="30" />
+                  </label>
+                  <label class="orb-param">
+                    <span>Sens:</span>
+                    <input type="range" id="orb-sens" min="0.5" max="3.0" step="0.1" value="1.8" />
+                  </label>
+                </div>
               </div>
             </div>
+
             <div class="booth-details" id="booth-details"></div>
           </div>
         </div>
       </div>
 
-      <!-- HUMAN GATE ACTION CENTER (STICKY/PROMINENT AT BOTTOM) -->
+      <!-- HUMAN GATE ACTION CENTER (STICKY/PROMINENT AT BOTTOM WITH VOICE INPUT) -->
       <section class="human-gate-dock" id="gate-dock">
         <div class="gate-inner">
           <div class="gate-title-col">
             <div class="gate-badge">👑 Human Editor Gate</div>
             <p class="gate-desc">You hold the final decision. AI cannot publish or deploy to canary without your explicit approval.</p>
+            
+            <!-- Mini Live Orb in Gate -->
+            <div class="gate-orb-preview" title="Live Voice Director Orb">
+              <canvas id="gate-voice-orb" width="56" height="56"></canvas>
+            </div>
           </div>
           
           <div class="gate-input-col">
@@ -454,7 +491,14 @@
               <button type="button" class="quick-note-chip" data-note="Sharpen Gujarati mother-tongue dialogue in the kitchen.">"Sharpen local dialect"</button>
               <button type="button" class="quick-note-chip" data-note="Cut the expository monologue in the opening scene.">"Cut opening monologue"</button>
             </div>
-            <textarea id="note" class="gate-textarea" rows="2" placeholder="Type custom direction note for rewrite (e.g. 'Make Meera confront Arjun at minute 4 before the food clip is shot')..."></textarea>
+            
+            <div class="gate-textarea-wrap">
+              <textarea id="note" class="gate-textarea" rows="2" placeholder="Type or speak custom direction note for rewrite (e.g. 'Make Meera confront Arjun at minute 4 before the food clip is shot')..."></textarea>
+              <button type="button" id="btn-voice-dictate" class="btn-voice-input" title="Dictate direction note via microphone">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                <span id="voice-dictate-label">Speak Note</span>
+              </button>
+            </div>
           </div>
 
           <div class="gate-actions-col">

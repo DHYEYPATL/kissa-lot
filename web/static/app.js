@@ -1,4 +1,4 @@
-// Qissa Studio — Audio Production Desk Client Controller
+// Qissa Studio — Audio Production Desk Client Controller & WebGL Voice Orb
 
 const PRESETS = {
   surat: {
@@ -30,6 +30,8 @@ const ticker = document.getElementById("ticker");
 const btnRun = document.getElementById("run");
 const btnText = document.getElementById("btn-text");
 const btnSpin = document.getElementById("btn-spin");
+
+let currentSessionId = "";
 
 // 1. PRESET BUTTONS
 document.querySelectorAll(".preset-btn").forEach((btn) => {
@@ -66,8 +68,6 @@ document.querySelectorAll(".desk-tab").forEach((tab) => {
   });
 });
 
-let currentSessionId = "";
-
 // 4. SUBMIT STORY FORM
 openForm.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -88,7 +88,6 @@ openForm.addEventListener("submit", async (e) => {
     if (data.session_id) currentSessionId = data.session_id;
     paint(data);
     updateStepper(2);
-    // Update packet download URL with session_id
     const exportBtn = document.getElementById("btn-export-packet");
     if (exportBtn) exportBtn.href = `/api/packet?session_id=${encodeURIComponent(currentSessionId)}`;
     board.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -147,16 +146,13 @@ function paint(s) {
 
   board.hidden = false;
   
-  // Pipeline Ticker Steps
   if (s.steps && s.steps.length) {
     ticker.innerHTML = s.steps.map((x) => `<li>✓ ${x}</li>`).join("");
   }
 
-  // Header Story Meta
   document.getElementById("story-title").textContent = s.title || "Untitled Lot";
   document.getElementById("story-logline").textContent = s.logline || s.seed || "";
   
-  // Verdict Pill
   const verdictPill = document.getElementById("verdict-pill");
   const verdictLabel = document.getElementById("verdict-label");
   if (s.status === "canary" || s.canary?.ran) {
@@ -176,7 +172,6 @@ function paint(s) {
     verdictLabel.textContent = "🟡 " + (s.verdict || "HOLD FOR HUMAN GREENLIGHT");
   }
 
-  // Summary Metrics
   const twins = s.twin_scores || [];
   const avgTwinScore = twins.length 
     ? Math.round(twins.reduce((acc, t) => acc + (t.score || 0), 0) / twins.length)
@@ -192,7 +187,6 @@ function paint(s) {
   document.getElementById("ledger-ratio").textContent = (ledger.ratio ?? 0.5);
   document.getElementById("ledger-rule").textContent = ledger.rule || "Pay one secret. Leave one open.";
 
-  // Render 7 Twin Persona Cards
   const twinsContainer = document.getElementById("twins-cards");
   twinsContainer.innerHTML = twins.map((t) => {
     const isPass = t.would_start_next || t.score >= 70;
@@ -222,9 +216,7 @@ function paint(s) {
     `;
   }).join("");
 
-  // Render Payoff Ledger & Memory Threads
   const ledgerThreads = document.getElementById("ledger-threads");
-  const promises = ledger.promises || [];
   const paid = ledger.paid || [];
   const openThreads = ledger.still_open || (s.memory?.open_threads || []);
   ledgerThreads.innerHTML = `
@@ -234,7 +226,6 @@ function paint(s) {
     </ul>
   `;
 
-  // Render Structural Diagnoses
   const dxContainer = document.getElementById("dx-list");
   const dxs = s.diagnoses || [];
   dxContainer.innerHTML = dxs.length ? dxs.map((d) => `
@@ -244,7 +235,6 @@ function paint(s) {
     </div>
   `).join("") : `<div class="dx-item" style="background:var(--jade-soft);border-color:var(--jade-border);color:var(--jade-green);"><strong>✓ Clean Structure:</strong> No pacing stalls or late agency detected in Episode 1.</div>`;
 
-  // Render Originality Near-Duplicates
   const origContainer = document.getElementById("orig-list");
   origContainer.innerHTML = (s.originality || []).map((o) => `
     <li>
@@ -254,7 +244,6 @@ function paint(s) {
     </li>
   `).join("") || "<li>No near-duplicates found in catalog.</li>";
 
-  // Render Canary Valve
   const canary = s.canary || {};
   const canaryPill = document.getElementById("canary-status-pill");
   const canaryDesc = document.getElementById("canary-desc");
@@ -276,12 +265,10 @@ function paint(s) {
     canaryStats.hidden = true;
   }
 
-  // Render Formatted Screenplay
   document.getElementById("ep1-title").textContent = `Episode 1: ${ep1.title || 'The Turn'} (${ep1.minutes || 12} mins)`;
   const scriptReader = document.getElementById("script-formatted");
   scriptReader.innerHTML = formatScreenplay(ep1.script || "");
 
-  // Render Before vs After Rewrite Diff
   const baList = s.before_after || [];
   const lastBA = baList[baList.length - 1];
   const baContainer = document.getElementById("ba-diff");
@@ -299,7 +286,6 @@ function paint(s) {
     `;
   }
 
-  // Render Interactive Branches
   const branchesContainer = document.getElementById("branches-list");
   branchesContainer.innerHTML = (s.branch_scores || []).map((b) => `
     <div class="branch-card">
@@ -311,7 +297,6 @@ function paint(s) {
     </div>
   `).join("");
 
-  // Render Monetization Tags
   const adsContainer = document.getElementById("ads-list");
   adsContainer.innerHTML = (s.monetization || []).map((m) => `
     <li>
@@ -320,7 +305,6 @@ function paint(s) {
     </li>
   `).join("");
 
-  // Render Parallel Trends & Citations
   const trend = s.trend || {};
   renderTagList("tropes-rising", trend.tropes_rising || []);
   renderTagList("tropes-saturated", trend.tropes_saturated || []);
@@ -336,7 +320,6 @@ function paint(s) {
     </div>
   `).join("") : `<div class="citation-card">Offline fallback or no citations available.</div>`;
 
-  // Render Booth & Bible Details
   const bibleContent = document.getElementById("bible-content");
   bibleContent.innerHTML = `
     <div style="background:#fff;border:1px solid var(--paper-border);padding:14px;border-radius:var(--radius-sm);margin-bottom:12px;font-family:'Newsreader',serif;font-size:15px;">
@@ -347,8 +330,13 @@ function paint(s) {
   const charsList = document.getElementById("characters-list");
   charsList.innerHTML = (s.characters || []).map((c) => `
     <div style="background:#fff;border:1px solid var(--paper-border);padding:10px 14px;border-radius:var(--radius-sm);margin-bottom:8px;">
-      <div style="font-weight:700;color:var(--paper-ink);">${c.name} <span style="font-size:11px;color:var(--gold-dark);font-family:'JetBrains Mono';">(${c.voice})</span></div>
-      <div style="font-size:12px;color:var(--paper-sub);margin-top:2px;"><strong>Wound:</strong> ${c.wound}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-weight:700;color:var(--paper-ink);">${c.name} <span style="font-size:11px;color:var(--gold-dark);font-family:'JetBrains Mono';">(${c.voice})</span></div>
+        <button type="button" class="char-audition-btn" onclick="auditionVoice('${c.name}', '${c.voice}')">
+          ▶ Audition Voice
+        </button>
+      </div>
+      <div style="font-size:12px;color:var(--paper-sub);margin-top:4px;"><strong>Wound:</strong> ${c.wound}</div>
       <div style="font-size:12px;color:var(--paper-sub);"><strong>Goal:</strong> ${c.goal}</div>
     </div>
   `).join("");
@@ -378,14 +366,14 @@ function formatScreenplay(scriptText) {
     const trimmed = line.trim();
     if (!trimmed) return "<div style='height:8px;'></div>";
     
-    if (trimmed.startsWith("MEENA:")) {
-      return `<div class="script-dialogue-line"><span class="speaker-tag speaker-meena">MEENA</span> ${trimmed.replace("MEENA:", "").trim()}</div>`;
-    }
-    if (trimmed.startsWith("ARJUN:")) {
-      return `<div class="script-dialogue-line"><span class="speaker-tag speaker-arjun">ARJUN</span> ${trimmed.replace("ARJUN:", "").trim()}</div>`;
-    }
     if (trimmed.startsWith("SFX:")) {
       return `<div class="script-dialogue-line"><span class="speaker-tag speaker-sfx">SFX</span> <em>${trimmed.replace("SFX:", "").trim()}</em></div>`;
+    }
+    const colonIdx = trimmed.indexOf(":");
+    if (colonIdx > 0 && colonIdx < 15 && !trimmed.startsWith("http")) {
+      const name = trimmed.substring(0, colonIdx).trim();
+      const speech = trimmed.substring(colonIdx + 1).trim();
+      return `<div class="script-dialogue-line"><span class="speaker-tag speaker-char">${name}</span> ${speech}</div>`;
     }
     if (trimmed.includes("(memory)") || trimmed.includes("(private)")) {
       return `<div class="script-dialogue-line" style="color:var(--gold-dark);font-style:italic;">${trimmed}</div>`;
@@ -393,3 +381,363 @@ function formatScreenplay(scriptText) {
     return `<div class="script-dialogue-line">${trimmed}</div>`;
   }).join("");
 }
+
+// 7. VOICE AUDITION USING BROWSER SPEECH SYNTHESIS
+window.auditionVoice = function(name, voiceTag) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  
+  const sample = `${name} speaking. The scene starts before the camera is ready.`;
+  const utterance = new SpeechSynthesisUtterance(sample);
+  
+  if (voiceTag.includes("low") || voiceTag.includes("dry")) {
+    utterance.pitch = 0.8;
+    utterance.rate = 0.9;
+  } else if (voiceTag.includes("bright")) {
+    utterance.pitch = 1.25;
+    utterance.rate = 1.1;
+  } else if (voiceTag.includes("whisper")) {
+    utterance.pitch = 1.0;
+    utterance.rate = 0.85;
+    utterance.volume = 0.6;
+  } else {
+    utterance.pitch = 1.0;
+    utterance.rate = 1.0;
+  }
+  
+  window.speechSynthesis.speak(utterance);
+};
+
+// 8. WEBGL VOICE POWERED ORB SHADER IMPLEMENTATION
+class VoiceOrbRenderer {
+  constructor(canvasId) {
+    this.canvas = document.getElementById(canvasId);
+    if (!this.canvas) return;
+    this.gl = this.canvas.getContext("webgl") || this.canvas.getContext("experimental-webgl");
+    if (!this.gl) return;
+    
+    this.hue = 30.0;
+    this.sensitivity = 1.8;
+    this.audioLevel = 0.0;
+    this.rot = 0.0;
+    this.lastTime = 0;
+    this.isRecording = false;
+
+    this.initShaders();
+    this.initBuffers();
+    this.animate = this.animate.bind(this);
+    requestAnimationFrame(this.animate);
+  }
+
+  initShaders() {
+    const vsSource = `
+      attribute vec2 position;
+      varying vec2 vUv;
+      void main() {
+        vUv = (position + 1.0) * 0.5;
+        gl_Position = vec4(position, 0.0, 1.0);
+      }
+    `;
+
+    const fsSource = `
+      precision highp float;
+      uniform float iTime;
+      uniform vec2 iResolution;
+      uniform float hue;
+      uniform float hover;
+      uniform float rot;
+      uniform float hoverIntensity;
+      varying vec2 vUv;
+
+      vec3 rgb2yiq(vec3 c) {
+        float y = dot(c, vec3(0.299, 0.587, 0.114));
+        float i = dot(c, vec3(0.596, -0.274, -0.322));
+        float q = dot(c, vec3(0.211, -0.523, 0.312));
+        return vec3(y, i, q);
+      }
+
+      vec3 yiq2rgb(vec3 c) {
+        float r = c.x + 0.956 * c.y + 0.621 * c.z;
+        float g = c.x - 0.272 * c.y - 0.647 * c.z;
+        float b = c.x - 1.106 * c.y + 1.703 * c.z;
+        return vec3(r, g, b);
+      }
+
+      vec3 adjustHue(vec3 color, float hueDeg) {
+        float hueRad = hueDeg * 3.14159265 / 180.0;
+        vec3 yiq = rgb2yiq(color);
+        float cosA = cos(hueRad);
+        float sinA = sin(hueRad);
+        float i = yiq.y * cosA - yiq.z * sinA;
+        float q = yiq.y * sinA + yiq.z * cosA;
+        yiq.y = i;
+        yiq.z = q;
+        return yiq2rgb(yiq);
+      }
+
+      vec3 hash33(vec3 p3) {
+        p3 = fract(p3 * vec3(0.1031, 0.11369, 0.13787));
+        p3 += dot(p3, p3.yxz + 19.19);
+        return -1.0 + 2.0 * fract(vec3(p3.x + p3.y, p3.x + p3.z, p3.y + p3.z) * p3.zyx);
+      }
+
+      float snoise3(vec3 p) {
+        const float K1 = 0.333333333;
+        const float K2 = 0.166666667;
+        vec3 i = floor(p + (p.x + p.y + p.z) * K1);
+        vec3 d0 = p - (i - (i.x + i.y + i.z) * K2);
+        vec3 e = step(vec3(0.0), d0 - d0.yzx);
+        vec3 i1 = e * (1.0 - e.zxy);
+        vec3 i2 = 1.0 - e.zxy * (1.0 - e);
+        vec3 d1 = d0 - (i1 - K2);
+        vec3 d2 = d0 - (i2 - K1);
+        vec3 d3 = d0 - 0.5;
+        vec4 h = max(0.6 - vec4(dot(d0, d0), dot(d1, d1), dot(d2, d2), dot(d3, d3)), 0.0);
+        vec4 n = h * h * h * h * vec4(dot(d0, hash33(i)), dot(d1, hash33(i + i1)), dot(d2, hash33(i + i2)), dot(d3, hash33(i + 1.0)));
+        return dot(vec4(31.316), n);
+      }
+
+      const vec3 baseColor1 = vec3(0.83, 0.60, 0.22);
+      const vec3 baseColor2 = vec3(0.15, 0.42, 0.27);
+      const vec3 baseColor3 = vec3(0.72, 0.24, 0.16);
+
+      void main() {
+        vec2 uv = (vUv - 0.5) * 2.0;
+        float angle = rot;
+        float s = sin(angle);
+        float c = cos(angle);
+        uv = vec2(c * uv.x - s * uv.y, s * uv.x + c * uv.y);
+        uv.x += hover * hoverIntensity * 0.15 * sin(uv.y * 10.0 + iTime);
+        uv.y += hover * hoverIntensity * 0.15 * sin(uv.x * 10.0 + iTime);
+
+        float len = length(uv);
+        float ang = atan(uv.y, uv.x);
+        float n0 = snoise3(vec3(uv * 0.65, iTime * 0.5)) * 0.5 + 0.5;
+        float r0 = mix(0.6, 1.0, n0);
+        float v0 = 1.0 / (1.0 + distance(uv, (r0 / max(0.01, len)) * uv) * 10.0);
+
+        vec3 col1 = adjustHue(baseColor1, hue);
+        vec3 col2 = adjustHue(baseColor2, hue);
+        vec3 col3 = adjustHue(baseColor3, hue);
+        vec3 col = mix(col1, col2, cos(ang + iTime * 2.0) * 0.5 + 0.5);
+        col = mix(col3, col, v0);
+
+        float v2 = smoothstep(1.0, 0.4, len);
+        col *= v2;
+        gl_FragColor = vec4(col, v2);
+      }
+    `;
+
+    const gl = this.gl;
+    const vs = gl.createShader(gl.VERTEX_SHADER);
+    gl.shaderSource(vs, vsSource);
+    gl.compileShader(vs);
+
+    const fs = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(fs, fsSource);
+    gl.compileShader(fs);
+
+    this.program = gl.createProgram();
+    gl.attachShader(this.program, vs);
+    gl.attachShader(this.program, fs);
+    gl.linkProgram(this.program);
+  }
+
+  initBuffers() {
+    const gl = this.gl;
+    const vertices = new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]);
+    const buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+
+    const posLoc = gl.getAttribLocation(this.program, "position");
+    gl.enableVertexAttribArray(posLoc);
+    gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+    this.uTime = gl.getUniformLocation(this.program, "iTime");
+    this.uRes = gl.getUniformLocation(this.program, "iResolution");
+    this.uHue = gl.getUniformLocation(this.program, "hue");
+    this.uHover = gl.getUniformLocation(this.program, "hover");
+    this.uRot = gl.getUniformLocation(this.program, "rot");
+    this.uHoverInt = gl.getUniformLocation(this.program, "hoverIntensity");
+  }
+
+  animate(now) {
+    if (!this.gl || !this.program) return;
+    const gl = this.gl;
+    const t = now * 0.001;
+    const dt = t - this.lastTime;
+    this.lastTime = t;
+
+    const baseRot = 0.35;
+    const speed = baseRot + this.audioLevel * this.sensitivity * 2.5;
+    this.rot += dt * speed;
+
+    gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+    gl.useProgram(this.program);
+
+    gl.uniform1f(this.uTime, t);
+    gl.uniform2f(this.uRes, this.canvas.width, this.canvas.height);
+    gl.uniform1f(this.uHue, this.hue);
+    gl.uniform1f(this.uHover, Math.min(this.audioLevel * 2.0, 1.0));
+    gl.uniform1f(this.uRot, this.rot);
+    gl.uniform1f(this.uHoverInt, Math.min(this.audioLevel * 0.8, 0.8));
+
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    requestAnimationFrame(this.animate);
+  }
+}
+
+// 9. AUDIO & SPEECH RECOGNITION CONTROLLER
+let audioCtx = null;
+let analyser = null;
+let micStream = null;
+let voiceOrbBooth = null;
+let voiceOrbGate = null;
+let recognition = null;
+let isRecording = false;
+
+function initAudioOrbEngines() {
+  voiceOrbBooth = new VoiceOrbRenderer("booth-voice-orb");
+  voiceOrbGate = new VoiceOrbRenderer("gate-voice-orb");
+
+  const hueInput = document.getElementById("orb-hue");
+  if (hueInput) {
+    hueInput.addEventListener("input", (e) => {
+      const val = parseFloat(e.target.value);
+      if (voiceOrbBooth) voiceOrbBooth.hue = val;
+      if (voiceOrbGate) voiceOrbGate.hue = val;
+    });
+  }
+
+  const sensInput = document.getElementById("orb-sens");
+  if (sensInput) {
+    sensInput.addEventListener("input", (e) => {
+      const val = parseFloat(e.target.value);
+      if (voiceOrbBooth) voiceOrbBooth.sensitivity = val;
+      if (voiceOrbGate) voiceOrbGate.sensitivity = val;
+    });
+  }
+}
+
+async function startMicrophone() {
+  try {
+    micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 256;
+    analyser.smoothingTimeConstant = 0.3;
+
+    const source = audioCtx.createMediaStreamSource(micStream);
+    source.connect(analyser);
+
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+    function updateAudio() {
+      if (!analyser) return;
+      analyser.getByteFrequencyData(dataArray);
+      let sum = 0;
+      for (let i = 0; i < dataArray.length; i++) {
+        const norm = dataArray[i] / 255.0;
+        sum += norm * norm;
+      }
+      const rms = Math.sqrt(sum / dataArray.length);
+      const level = Math.min(rms * 2.5, 1.0);
+      
+      if (voiceOrbBooth) voiceOrbBooth.audioLevel = level;
+      if (voiceOrbGate) voiceOrbGate.audioLevel = level;
+
+      if (micStream) {
+        requestAnimationFrame(updateAudio);
+      }
+    }
+    updateAudio();
+    return true;
+  } catch (err) {
+    console.warn("Microphone access denied or error:", err);
+    return false;
+  }
+}
+
+function stopMicrophone() {
+  if (micStream) {
+    micStream.getTracks().forEach((t) => t.stop());
+    micStream = null;
+  }
+  if (audioCtx) {
+    audioCtx.close();
+    audioCtx = null;
+  }
+  if (voiceOrbBooth) voiceOrbBooth.audioLevel = 0;
+  if (voiceOrbGate) voiceOrbGate.audioLevel = 0;
+}
+
+// 10. VOICE DICTATION FOR HUMAN GATE NOTE
+const btnVoiceDictate = document.getElementById("btn-voice-dictate");
+const dictateLabel = document.getElementById("voice-dictate-label");
+const noteArea = document.getElementById("note");
+
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+if (btnVoiceDictate) {
+  btnVoiceDictate.addEventListener("click", async () => {
+    if (isRecording) {
+      // Stop
+      isRecording = false;
+      btnVoiceDictate.classList.remove("recording");
+      dictateLabel.textContent = "Speak Note";
+      stopMicrophone();
+      if (recognition) recognition.stop();
+    } else {
+      // Start
+      const ok = await startMicrophone();
+      if (!ok) {
+        alert("Please enable microphone permissions in your browser to dictate notes.");
+        return;
+      }
+      isRecording = true;
+      btnVoiceDictate.classList.add("recording");
+      dictateLabel.textContent = "Listening...";
+
+      if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.onresult = (event) => {
+          let text = "";
+          for (let i = 0; i < event.results.length; i++) {
+            text += event.results[i][0].transcript;
+          }
+          noteArea.value = text;
+        };
+        recognition.onerror = (e) => console.warn("Speech recognition error:", e);
+        recognition.start();
+      }
+    }
+  });
+}
+
+// Booth test mic button
+const btnBoothMic = document.getElementById("btn-booth-mic");
+const boothMicLabel = document.getElementById("booth-mic-label");
+if (btnBoothMic) {
+  btnBoothMic.addEventListener("click", async () => {
+    if (micStream) {
+      stopMicrophone();
+      btnBoothMic.classList.remove("btn-danger");
+      btnBoothMic.classList.add("btn-primary");
+      boothMicLabel.textContent = "Test Mic Voice Pulse";
+    } else {
+      const ok = await startMicrophone();
+      if (ok) {
+        btnBoothMic.classList.remove("btn-primary");
+        btnBoothMic.classList.add("btn-danger");
+        boothMicLabel.textContent = "Stop Mic Stream";
+      }
+    }
+  });
+}
+
+// Initialize WebGL Shaders on window load
+window.addEventListener("DOMContentLoaded", () => {
+  initAudioOrbEngines();
+});
