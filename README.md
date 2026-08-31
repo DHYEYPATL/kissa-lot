@@ -34,19 +34,36 @@ Trends (Parallel Search) → bible + episodes (Gemini)
 
 Generation is the easy part. The product is what we refuse to publish, and how fast the next draft gets better.
 
-## Why this, not another writer bot
+## The Real Industry Crisis: Why Qissa Exists
 
-Serialized-audio desks already know acquisition is not the problem. Long-term retention is. Episodes live at 11–15 minutes. Listeners binge. They also drop when structure fails: late agency, unpaid mystery piles, mid-sentence ads, generated coffee talk, coin walls after the hook, 174 episodes of the same wound. Regional and niche shows die in committee because a flop is expensive.
+> *"User acquisition isn't the challenge... long-term retention is."*  
+> — **Rohan Nayak, Co-Founder & CEO, Pocket FM** (June 2026)
 
-If we only ship "Gemini writes episode 1," we lose this hackathon. The loop is the invention.
+Serialized audio platforms (Pocket FM, Kuku FM, ReelShort Audio) produce hundreds of 11–15 minute daily episodes. While top hits generate millions in revenue, platforms face **massive listener drop-off and trust erosion** driven by upstream structural failures:
 
-## Honest about twins and canary
+1. **Coin Walls & Dark Pattern Backlash**: Hooking listeners then locking episodes behind aggressive coin walls or cliffhangers engineered purely for payment.
+2. **174 Episodes of Unpaid Wounds**: Stalling narrative progress and looping the same trauma without payoff.
+3. **Mid-Sentence Commercials**: Placing programmatic audio ads directly inside dramatic lines (causing up to 40% first-time listener churn).
+4. **Flattened AI "Coffee Talk"**: AI generation collapsing authentic regional dialect into generic English exposition.
+5. **Slow Agency**: Protagonist taking >8 minutes to make a costly choice in a 12-minute episode.
 
-- Twins are seven persona cards with concrete behaviors. Not a trained causal model of a platform.
-- Canary is simulated, opt-in 3%, **blocked until a human approves**. We do not pretend we dumped experiments on a live base.
-- Graduation is catalog-relative against *hit* titles in the same bucket. No magic 60%. Flops do not lower the bar.
-- Originality is overlap + a planted clone (`His Secret Howl`) + Parallel near-duplicate search. Not a courtroom engine.
-- Monetization tags sit after an emotional beat. They are not the pitch.
+### The Missing Layer: Pre-Production Greenlight
+Existing platforms run post-publishing analytics: they discover a story has failed **after spending $5,000–$15,000 on studio voice actors and sound engineering**.
+
+**Qissa Studio is the pre-production retention desk**:
+- **Pre-scores retention drop-off at Episode 1** using 7 digital listener twins.
+- **Enforces the "Pay One, Leave One" Ledger** so mysteries resolve on mic.
+- **Audits Dark Pattern Risk & Dialect Texture** before recording budgets are committed.
+- **Strict Human Gate**: Pauses before production; canary simulation runs strictly upon human greenlight.
+- **Slack-Ready Decision Packet**: 1-click GO / NO-GO executive export.
+
+## Honest about Twins and Canary
+
+- **Twins**: Seven persona cards with concrete listener behaviors (commute binge, skeptic, dialect-first, sleep-listen).
+- **Canary**: Simulated 3% opt-in cohort model, **strictly blocked until a human approves**.
+- **Graduation Bar**: Catalog-relative against *hit* titles in the genre bucket (e.g. 59% for Regional Family Drama). Flops never lower the bar.
+- **Originality Guard**: Token overlap similarity + planted clone detection + Parallel near-duplicate search.
+- **Monetization Safety**: Tags sit strictly after resolved emotional beats—never mid-sentence or within 60s of a cliffhanger.
 
 ## Stack (rules-legal)
 

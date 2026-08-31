@@ -296,7 +296,8 @@ function paint(s) {
   currentDiagnoses = s.diagnoses || [];
   renderDiagnoses(currentDiagnoses);
 
-  // 4. TAB 1: TWINS TABLE
+  // 4. TAB 1: TWINS TABLE & RETENTION CURVE
+  renderRetentionCurve(twins, s.genre || "regional family drama");
   renderTwinsTable(twins);
 
   // 5. TAB 2: SCRIPT & DIFF
@@ -369,6 +370,50 @@ function renderDiagnoses(dxs) {
       <strong>• ${d.issue}:</strong> ${d.edit_op}
     </li>
   `).join("");
+}
+
+// RENDER RETENTION CURVE STRIP
+function renderRetentionCurve(twins, genre) {
+  const container = document.getElementById("curve-visual-strip");
+  const hitTag = document.getElementById("curve-hit-bar-tag");
+  if (!container) return;
+
+  const hitBars = {
+    "regional family drama": 0.59,
+    "mythic thriller": 0.58,
+    "campus dark romance": 0.67,
+    "investigative noir": 0.56,
+  };
+  const barTarget = hitBars[genre] || 0.59;
+  if (hitTag) hitTag.textContent = `Hit Bar: ${Math.round(barTarget * 100)}%`;
+
+  const checkpoints = [
+    { min: 1, label: "1m" },
+    { min: 3, label: "3m" },
+    { min: 5, label: "5m [Turn]" },
+    { min: 7, label: "7m" },
+    { min: 9, label: "9m" },
+    { min: 11, label: "11m" },
+    { min: 12, label: "12m [Cliff]" },
+  ];
+
+  const totalTwins = Math.max(1, twins.length);
+
+  container.innerHTML = checkpoints.map((cp) => {
+    // Twin is still listening if they finished OR if their drop minute > checkpoint minute
+    const listeningCount = twins.filter((t) => t.would_finish || t.drop_minute >= cp.min).length;
+    const pct = Math.round((listeningCount / totalTwins) * 100);
+    const isAboveBar = (pct / 100) >= barTarget;
+    const barColor = isAboveBar ? "var(--emerald)" : "var(--rose)";
+
+    return `
+      <div class="curve-col" title="${pct}% listeners active at minute ${cp.min}">
+        <span class="curve-val">${pct}%</span>
+        <div class="curve-bar" style="height:${pct}%;background:${barColor};"></div>
+        <span class="curve-lbl">${cp.label}</span>
+      </div>
+    `;
+  }).join("");
 }
 
 // RENDER COMPACT TWINS TABLE

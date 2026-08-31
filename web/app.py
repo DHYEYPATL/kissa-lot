@@ -142,6 +142,7 @@ def packet(session_id: str = Query("")) -> PlainTextResponse:
         f"RETENTION:      Twin Mean {twin_mean}/100 | Hit Bar {bar['completion_bar']:.0%} | Canary: {'RAN (' + str(round(state.canary.completion * 100)) + '%)' if state.canary.ran else 'BLOCKED (Waits on Human Approve)'}",
         f"INTEGRITY:      Payoff Ledger {state.ledger.ratio:.0%} Paid | Dialect: {state.dialect_verdict} ({state.dialect_score:.0%}) | Dark Pattern Risk: {state.dark_pattern_risk}",
         f"FIRST TURN:     Minute {state.episodes[0].first_turn_minute if state.episodes else 5.0}m (Target: <5m) | Exposition: {state.episodes[0].exposition_minutes if state.episodes else 1.2}m",
+        f"STUDIO ROI:     De-risks ~$5,000–$12,000 in voice casting & studio recording spend.",
         "=======================================================================",
         f"OWNED FACT:     {state.owned_fact or '(none locked)'}",
         f"REFUSED CLICHE: {state.refused_instinct}",
