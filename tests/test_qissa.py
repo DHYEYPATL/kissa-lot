@@ -7,8 +7,9 @@ from qissa.catalog import bucket_bar
 from qissa.craft import showrun
 from qissa.eval_harness import run_eval
 from qissa.pipeline import human_gate, run_desk
+from qissa.sessions import get_session, save_session
 from qissa.state import Character, Episode, SeriesState
-from web.app import app, SESSIONS
+from web.app import app
 
 
 class QissaTests(unittest.TestCase):
@@ -34,16 +35,25 @@ class QissaTests(unittest.TestCase):
     def test_canary_waits_for_human(self):
         state = run_desk("Kitchen secret.")
         self.assertFalse(state.canary.ran)
+        self.assertEqual(state.canary.vs_catalog, "blocked")
+        
+        # Applying a direction still keeps canary blocked
+        state = human_gate(state, "direct", "Give Meena more lines.")
+        self.assertFalse(state.canary.ran)
+        self.assertEqual(state.status, "review")
+        
+        # Approve unlocks canary
         state = human_gate(state, "approve", "Ship the tape scene.")
         self.assertTrue(state.canary.ran)
         self.assertTrue(state.canary.opted_in)
-        self.assertIn(state.status, {"graduate", "review", "iterate"})
+        self.assertIn(state.status, {"graduate", "archive"})
 
     def test_iteration_cap(self):
         state = run_desk("Kitchen secret.")
         state.cycle = 4
         state = human_gate(state, "direct", "darker")
         self.assertEqual(state.status, "archive")
+        self.assertIn("iteration cap", state.verdict)
 
     def test_hit_bar_ignores_flops(self):
         bar = bucket_bar("campus dark romance")
@@ -52,7 +62,7 @@ class QissaTests(unittest.TestCase):
     def test_human_direction_changes_script(self):
         state = run_desk("A Surat cook hides a notebook.")
         before = state.episodes[0].script
-        state = human_gate(state, "direct", "Give her more agency in scene 3")
+        state = human_gate(state, "direct", "Give her more agency in scene 3 before minute 4")
         self.assertNotEqual(state.episodes[0].script, before)
         self.assertTrue(state.before_after)
         self.assertEqual(state.cycle, 1)
@@ -77,7 +87,7 @@ class QissaTests(unittest.TestCase):
             "first_turn_minute": 4.5,
             "exposition_minutes": 1.0,
         }
-        with patch("qissa.llm.generate_json", return_value=mock_data):
+        with patch("qissa.llm.generate_json", return_value=mock_data), patch("qissa.llm.is_live_gemini", return_value=True):
             state = SeriesState(
                 title="Lineman and the Ghost Radio",
                 genre="regional family drama",
@@ -121,15 +131,21 @@ class QissaTests(unittest.TestCase):
         self.assertEqual(res_b.json()["genre"], "campus dark romance")
         self.assertEqual(res_b.json()["session_id"], "user-b")
 
-        # Verify state in memory is distinct
-        self.assertEqual(SESSIONS["user-a"].genre, "mythic thriller")
-        self.assertEqual(SESSIONS["user-b"].genre, "campus dark romance")
+        # Verify state in session store is distinct
+        state_a = get_session("user-a")
+        state_b = get_session("user-b")
+        self.assertIsNotNone(state_a)
+        self.assertIsNotNone(state_b)
+        self.assertEqual(state_a.genre, "mythic thriller")
+        self.assertEqual(state_b.genre, "campus dark romance")
 
         # User A directs rewrite on their own story
         res_gate = client.post("/api/gate", data={"action": "direct", "note": "Make it darker", "session_id": "user-a"})
         self.assertEqual(res_gate.status_code, 200)
         self.assertEqual(res_gate.json()["session_id"], "user-a")
-        self.assertEqual(SESSIONS["user-b"].cycle, 0)  # User B unaffected
+        
+        # User B unaffected
+        self.assertEqual(get_session("user-b").cycle, 0)
 
         # Unknown session ID must return 404 error, NEVER leak User A's or User B's state
         res_unknown = client.post("/api/gate", data={"action": "approve", "session_id": "nonexistent-session"})

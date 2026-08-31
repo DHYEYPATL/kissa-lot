@@ -11,10 +11,15 @@ except Exception:  # package present in requirements; missing only in bare sandb
     Parallel = None  # type: ignore[misc, assignment]
 
 
+def is_live_parallel() -> bool:
+    """Check if Parallel Search API is configured."""
+    return bool(os.environ.get("PARALLEL_API_KEY", "").strip()) and (Parallel is not None)
+
+
 def parallel_search(objective: str, queries: list[str]) -> list[dict[str, Any]]:
     api_key = os.environ.get("PARALLEL_API_KEY", "").strip()
     if not api_key:
-        raise RuntimeError("PARALLEL_API_KEY missing")
+        raise RuntimeError("PARALLEL_API_KEY is not set in environment or .env")
     if Parallel is None:
         raise RuntimeError("parallel-web is not installed")
 

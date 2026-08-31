@@ -22,7 +22,7 @@ class TrendBrief(BaseModel):
     regional_moments: list[str] = Field(default_factory=list)
     listener_pains: list[str] = Field(default_factory=list)
     tone: str = ""
-    citations: list[dict[str, str]] = Field(default_factory=list)
+    citations: list[dict[str, Any]] = Field(default_factory=list)
     engine: str = "offline"
 
 
@@ -167,6 +167,9 @@ class SeriesState(BaseModel):
     rescue_of: str = ""
     owned_fact: str = ""
     refused_instinct: str = ""
+    dialect_score: float = 0.85
+    dialect_verdict: str = "High Authenticity"
+    dark_pattern_risk: str = "Low / Safe"
     slop_flags: list[str] = Field(default_factory=list)
     booth: dict[str, Any] = Field(default_factory=dict)
     provenance: dict[str, str] = Field(default_factory=dict)

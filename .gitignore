@@ -12,3 +12,6 @@ build/
 web/static/runs/
 .idea/
 .vscode/
+*.db
+*.sqlite
+.qissa_sessions*

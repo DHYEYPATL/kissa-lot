@@ -14,8 +14,8 @@ from qissa.agents import (
     simulate_canary,
     _fallback_trend,
 )
-from qissa.catalog import find_title
-from qissa.state import HumanDecision, SeriesState
+from qissa.catalog import find_title, bucket_bar
+from qissa.state import CanaryReport, HumanDecision, SeriesState
 from qissa.uniqueness import booth_packet, provenance, refused_instinct, scan_slop
 
 
@@ -88,9 +88,19 @@ def run_desk(
     )
     state.steps.append("uniqueness+booth_packet")
 
-    state.canary = simulate_canary(state)
+    # Canary is strictly blocked until human approval
+    bar = bucket_bar(state.genre)
+    state.canary = CanaryReport(
+        cohort_pct=3.0,
+        opted_in=True,
+        disclosed_ai=True,
+        ran=False,
+        blocked_reason="Canary waits for human greenlight. Opt-in 3% only. AI disclosed.",
+        catalog_bar=bar["completion_bar"],
+        vs_catalog="blocked",
+    )
     state.status = "review"
-    state = decide_graduation(state)
+    state.verdict = "HOLD FOR HUMAN GATE — twin bench scored; canary blocked until human approval."
     state.steps.append("human_gate_wait")
     return state
 
@@ -109,28 +119,41 @@ def human_gate(state: SeriesState, action: str, note: str = "") -> SeriesState:
                 state.status = state.status if state.status == "graduate" else "review"
         state.steps.append("human_approve")
         return state
+
     if action == "reject":
         state.human_decisions.append(HumanDecision(action="reject", note=note, cycle=state.cycle))
         state.status = "archive"
         state.verdict = "ARCHIVE + REWORK BRIEF"
-        state.rework_brief = note or state.rework_brief or (
-            "Human rejected the packet. Keep the object, cut the spectacle."
+        char_names = ", ".join(c.name for c in state.characters[:2])
+        state.rework_brief = note or (
+            f"Human producer rejected the packet.\n"
+            f"SALVAGEABLE ASSETS: Characters ({char_names}), Owned Fact ('{state.owned_fact or 'none'}').\n"
+            f"GUIDANCE: Keep the central personal relationship, rewrite scene 1 with higher stakes before minute 3."
         )
         state.steps.append("human_reject_archive")
         return state
+
     if state.cycle >= state.max_cycles:
         state.status = "archive"
-        state.verdict = "ARCHIVE — iteration cap"
-        state.rework_brief = "Four cycles used. Hand the bible to a human writer."
+        state.verdict = "ARCHIVE — iteration cap reached"
+        state.rework_brief = (
+            f"All {state.max_cycles} human direction cycles used without clearing the hit-bar.\n"
+            f"Hand the story bible and characters ({', '.join(c.name for c in state.characters)}) to a human writer room."
+        )
         state.steps.append("iteration_cap")
         return state
-    state = apply_direction(state, note or "Tighten agency in scene 3.")
+
+    # Action is 'direct'
+    state = apply_direction(state, note or "Tighten agency in scene 1 before minute 4.")
     state.diagnoses = criticize(state)
     state.twin_scores = score_twins(state)
     state.branch_scores = score_branches(state)
     state.ledger = build_ledger(state)
     state.originality = originality_scan(state)
     state.monetization = monetize(state)
-    state = decide_graduation(state)
+    
+    # Keep canary blocked and hold for human gate review
+    state.status = "review"
+    state.verdict = f"HOLD FOR HUMAN GATE (Cycle {state.cycle}/{state.max_cycles}) — draft updated, twins re-scored."
     state.steps.append(f"human_direct_cycle_{state.cycle}")
     return state

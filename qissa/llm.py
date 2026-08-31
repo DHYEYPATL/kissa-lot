@@ -1,8 +1,12 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
+import re
 from typing import Any
+
+logger = logging.getLogger("qissa.llm")
 
 # Official Google Cloud AI runtime import (accepted SDK: google-genai).
 try:
@@ -16,6 +20,17 @@ def model_name() -> str:
 
 
 _CLIENT = None
+
+
+def is_live_gemini() -> bool:
+    """Check if Gemini API keys or Vertex AI are configured and available."""
+    if genai is None:
+        return False
+    return bool(
+        os.environ.get("GEMINI_API_KEY")
+        or os.environ.get("GOOGLE_API_KEY")
+        or (os.environ.get("GOOGLE_GENAI_USE_VERTEXAI", "").lower() == "true" and os.environ.get("GOOGLE_CLOUD_PROJECT"))
+    )
 
 
 def client():
@@ -34,46 +49,80 @@ def client():
     else:
         key = (os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY") or "").strip()
         if not key:
-            raise RuntimeError("GEMINI_API_KEY missing")
+            raise RuntimeError("GEMINI_API_KEY is not set in environment or .env")
         _CLIENT = genai.Client(api_key=key)
     return _CLIENT
 
 
-def generate_json(prompt: str) -> dict[str, Any]:
+def generate_json(prompt: str, retries: int = 2) -> dict[str, Any]:
+    """Generate structured JSON using Gemini with multiple extraction and retry fallbacks."""
     c = client()
-    try:
-        from google.genai import types
-        config = types.GenerateContentConfig(response_mime_type="application/json")
-        response = c.models.generate_content(model=model_name(), contents=prompt, config=config)
-    except Exception:
-        response = c.models.generate_content(model=model_name(), contents=prompt)
-    text = (getattr(response, "text", None) or "").strip()
-    return extract_json(text)
+    last_err = None
+    for attempt in range(retries):
+        try:
+            from google.genai import types
+            config = types.GenerateContentConfig(
+                response_mime_type="application/json",
+                temperature=0.7 if attempt == 0 else 0.4,
+            )
+            response = c.models.generate_content(model=model_name(), contents=prompt, config=config)
+            text = (getattr(response, "text", None) or "").strip()
+            parsed = extract_json(text)
+            if parsed and isinstance(parsed, dict):
+                return parsed
+        except Exception as exc:
+            last_err = exc
+            logger.warning("generate_json attempt %d failed: %s", attempt + 1, exc)
+
+    if last_err:
+        raise last_err
+    return {}
 
 
 def generate_text(prompt: str) -> str:
+    """Generate plain text from Gemini."""
     response = client().models.generate_content(model=model_name(), contents=prompt)
     return (getattr(response, "text", None) or "").strip()
 
 
 def extract_json(text: str) -> dict[str, Any]:
+    """Robustly extract and parse JSON object from model output."""
+    if not text:
+        return {}
+
     cleaned = text.strip()
+
+    # Strip markdown code blocks
     if cleaned.startswith("```"):
-        cleaned = cleaned.split("\n", 1)[-1]
-        if cleaned.endswith("```"):
-            cleaned = cleaned[: cleaned.rfind("```")]
+        cleaned = re.sub(r"^```(?:json)?\s*", "", cleaned, flags=re.IGNORECASE)
+        cleaned = re.sub(r"\s*```$", "", cleaned)
         cleaned = cleaned.strip()
-        if cleaned.startswith("json"):
-            cleaned = cleaned[4:].strip()
+
+    # Pass 1: Direct JSON parsing
     try:
         parsed = json.loads(cleaned)
-        return parsed if isinstance(parsed, dict) else {}
-    except json.JSONDecodeError:
-        start, end = cleaned.find("{"), cleaned.rfind("}")
-        if start >= 0 and end > start:
+        if isinstance(parsed, dict):
+            return parsed
+    except Exception:
+        pass
+
+    # Pass 2: Extract outer JSON braces
+    start = cleaned.find("{")
+    end = cleaned.rfind("}")
+    if start >= 0 and end > start:
+        snippet = cleaned[start : end + 1]
+        try:
+            parsed = json.loads(snippet)
+            if isinstance(parsed, dict):
+                return parsed
+        except Exception:
+            # Pass 3: Clean trailing commas or common syntax issues
             try:
-                parsed = json.loads(cleaned[start : end + 1])
-                return parsed if isinstance(parsed, dict) else {}
-            except json.JSONDecodeError:
-                return {}
+                fixed = re.sub(r",\s*([\]}])", r"\1", snippet)
+                parsed = json.loads(fixed)
+                if isinstance(parsed, dict):
+                    return parsed
+            except Exception:
+                pass
+
     return {}
